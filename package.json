@@ -1,0 +1,28 @@
+{
+  "name": "queue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./server/index.js",
+    "dev": "nodemon ./server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RobinOstner/Queue.git"
+  },
+  "author": "Robin Ostner",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RobinOstner/Queue/issues"
+  },
+  "homepage": "https://github.com/RobinOstner/Queue#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongodb": "^3.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
