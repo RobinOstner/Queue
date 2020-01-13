@@ -7,5 +7,9 @@ module.exports = {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return text;
+  },
+
+  generateNewQueueID: function () {
+    return Math.floor(Math.random() * 1000000);
   }
 }

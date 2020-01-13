@@ -14,7 +14,7 @@ const mutations = {
 
 const actions = {
   login: async function () {
-    console.log("Guest Login in Store");
+    
   },
 }
 

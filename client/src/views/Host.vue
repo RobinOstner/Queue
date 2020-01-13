@@ -1,15 +1,20 @@
 <template>
   <div class="container">
     <h1 class="title">HOST</h1>
+    <h2 class="id">{{ queueID() }}</h2>
   </div>
 </template>
 
 <script>
-  import { mapActions } from "vuex";
+  import { mapActions, mapGetters } from "vuex";
+  import axios from "axios";
 
   export default {
     name: "Host",
     methods: {
+      ...mapGetters("queue", {
+        queueID: "getQueueID",
+      }),
       ...mapActions("auth", ["setAccessToken", "setRefreshToken", "setExpiryTime"])
     },
     mounted() {
@@ -28,6 +33,7 @@
         this.setExpiryTime(expires_in);
         this.$router.push("/host");
         this.$store.dispatch("player/init", null, { root: true });
+        this.$store.dispatch("queue/createQueue", null, {root: true});
       }
     }
   };
