@@ -3,13 +3,15 @@
 CREATED BY: Robin Ostner
 
 PACKAGES/FRAMEWORKS:
-
 Vue
 Node
 MongoDB
 Express
 Babel
 ESLint
+
+DATABASE:
+MongoDB Atlas
 
 DEPLOYED ON:
 Heroku
