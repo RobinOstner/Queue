@@ -13,9 +13,11 @@ app.use(function (req, res, next) {
 
 const posts = require("./routes/api/posts");
 const auth = require("./routes/api/auth");
+const queue = require("./routes/api/queue");
 
 app.use("/api/posts", posts);
 app.use("/api/auth", auth);
+app.use("/api/queue", queue);
 
 // Handle production
 if (process.env.NODE_ENV == "production") {

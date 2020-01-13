@@ -1,4 +1,4 @@
-var util = require("../../util/util");
+var util = require("../../util/");
 var config = require("../../config");
 var querystring = require("querystring");
 var request = require("request");
