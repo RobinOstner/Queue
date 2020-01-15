@@ -3,6 +3,7 @@ import App from './App.vue';
 
 import router from "@/router";
 import store from "@/store";
+import api from "@/api";
 
 var VueCookie = require('vue-cookie');
 
@@ -14,4 +15,14 @@ const app = new Vue({
   render: h => h(App),
   router,
   store,
+  created() {
+    window.addEventListener('beforeunload', this.unload)
+  },
+  methods: {
+    unload: function (event) {
+      if (this.$store.state.queue.id !== "") {
+        api.queue.closeQueue(this.$store.state.queue.id);
+      }
+    }
+  }
 }).$mount('#app')
