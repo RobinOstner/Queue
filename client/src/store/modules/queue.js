@@ -20,7 +20,6 @@ const actions = {
       var response = await api.queue.createQueue();
   
       if (response.data) {
-        console.log(response.data.id);
         commit("SET_QUEUE_ID", response.data.id);
       }
     } catch (e) {

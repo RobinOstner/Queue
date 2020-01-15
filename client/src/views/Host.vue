@@ -2,6 +2,7 @@
   <div class="container">
     <h1 class="title">HOST</h1>
     <h2 class="id">{{ queueID() }}</h2>
+    <search/>
   </div>
 </template>
 
@@ -9,8 +10,13 @@
   import { mapActions, mapGetters } from "vuex";
   import axios from "axios";
 
+  import Search from "@/components/Search"
+
   export default {
     name: "Host",
+    components: {
+      Search
+    },
     methods: {
       ...mapGetters("queue", {
         queueID: "getQueueID",
