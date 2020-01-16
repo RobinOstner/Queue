@@ -6,7 +6,7 @@ const credentials = require('../config/credentials')[env]
 
 
 class DBConnection {
-    static connectToMongo() {
+    static connect() {
         if ( this.db ) return Promise.resolve(this.db)
         return MongoClient.connect(credentials.database.url, this.options)
             .then(db => this.db = db)
@@ -15,9 +15,6 @@ class DBConnection {
 }
 
 DBConnection.db = null
-//DBConnection.url = 'mongodb+srv://' + credentials.database.user +':' + credentials.database.password + '@queue-xdyvz.mongodb.net/test?retryWrites=true&w=majority'
-//DBConnection.url = 'mongodb://' + credentials.database.user + ':' + credentials.database.password + '@'+ credentials.database.host + ':' + credentials.database.port + '/' + credentials.database.name;
-//DBConnection.urlNoAuth = 'mongodb://' + credentials.database.host + ':' + credentials.database.port + '/' + credentials.database.name;
 DBConnection.options = {
     bufferMaxEntries:   0,
     reconnectTries:     5000,

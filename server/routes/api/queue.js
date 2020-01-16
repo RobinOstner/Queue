@@ -43,7 +43,7 @@ router.get("/queueAll", async(req, res) => {
 });
 
 async function loadQueuesCollection() {
-  const client = await DBConnection.connectToMongo();
+  const client = await DBConnection.connect();
   return client.db("queue").collection("queues");
 }
 

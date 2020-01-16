@@ -28,7 +28,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 async function loadPostsCollection() {
-  const client = await DBConnection.connectToMongo();
+  const client = await DBConnection.connect();
 
   return client.db('queue').collection('posts');
 }
