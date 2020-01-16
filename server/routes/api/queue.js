@@ -3,7 +3,7 @@ const config = require("../../config");
 
 const querystring = require("querystring");
 const express = require("express");
-const { DBConnection } = require("../../util/dbConnection.js");
+const { DBConnection } = require("../../extern/mongo/dbConnection.js");
 
 const router = express.Router();
 
