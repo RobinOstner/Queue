@@ -3,7 +3,7 @@ const config = require("../../config");
 
 const querystring = require("querystring");
 const express = require("express");
-const mongodb = require("mongodb");
+const { DBConnection } = require("../../util/dbConnection.js");
 
 const router = express.Router();
 
@@ -38,11 +38,12 @@ router.delete("/closeQueue", async (req, res) => {
   queues.deleteOne({queueID: id});
 });
 
-async function loadQueuesCollection() {
-  const client = await mongodb.MongoClient.connect("mongodb+srv://robin:1MuhahA1@queue-pggbq.mongodb.net/test?retryWrites=true&w=majority", {
-    useNewUrlParser: true
-  });
+router.get("/queueAll", async(req, res) => {
+  res.send(loadQueuesCollection().toArray());
+});
 
+async function loadQueuesCollection() {
+  const client = await DBConnection.connectToMongo();
   return client.db("queue").collection("queues");
 }
 

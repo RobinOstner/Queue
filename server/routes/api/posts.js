@@ -1,5 +1,5 @@
 const express = require("express");
-const mongodb = require("mongodb");
+const { DBConnection } = require("../../util/dbConnection.js");
 
 const router = express.Router();
 
@@ -28,9 +28,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 async function loadPostsCollection() {
-  const client = await mongodb.MongoClient.connect('mongodb+srv://robin:1MuhahA1@queue-pggbq.mongodb.net/test?retryWrites=true&w=majority', {
-    useNewUrlParser: true
-  });
+  const client = await DBConnection.connectToMongo();
 
   return client.db('queue').collection('posts');
 }
