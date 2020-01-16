@@ -1,23 +1,16 @@
+//copy and rename file to credentials and fill out
 var credentials = {
     development: {
         //mongodb connection settings
         database: {
-            host:   '127.0.0.1',
-            port:   '27017',
-            db:     '',
-            user:   '',
-            password:   ''
+            url: ''
         },
     },
     production: {
         //mongodb connection settings
         database: {
-            host: '127.0.0.1',
-            port: '27017',
-            db:     '',
-            user:   '',
-            password:   ''
+            url: ''
         },
     }
-    };
-    module.exports = credentials;
+};
+module.exports = credentials;
