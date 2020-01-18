@@ -1,40 +1,28 @@
 const jwt = require('jsonwebtoken');
-const fs = require('fs')
+const tokenHandler = require('../../util/tokenHandler');
+const tokenChecker = require('../../util/tokenChecker');
 const express = require("express");
-
-var env = process.env.NODE_ENV || 'development';
-const credentials = require('../../config/credentials')[env]
 
 const router = express.Router();
 
-//ToDo shouldnt be an endpoint move to authentication
-router.get('/getToken', (req, res) => {
-	let privateKey = fs.readFileSync('./server/config/keys/key.pem', 'utf8');
-	let token = jwt.sign({ "body": "stuff" }, privateKey, { algorithm: 'HS256'});
-	res.send(token);
+router.post('/refreshToken', (req, res) => {
+	const postData = req.body;
+
+	if (!((postData.refreshToken) && (tokenHandler.tokenExist(postData.refreshToken)))) {
+		res.status(404).send('Invalid request')
+	}
+
+	let token = tokenHandler.tokenRefresh(postData.refreshToken);
+	const response = {
+		"token": token,
+	};
+
+	res.status(200).json(response);
 });
 
 //ToDo remove debug function
-router.get('/isAuthenticated', isAuthenticated, (req, res) => {
-	res.json({ "message" : "Welcome" })
+router.get('/isAuthenticated', tokenChecker, (req, res) => {
+	res.json({"message": "Welcome"});
 });
-
-function isAuthenticated(req, res, next) {
-	if (typeof req.headers.authorization !== "undefined") {
-		let token = req.headers.authorization.split(" ")[1];
-		let privateKey = fs.readFileSync('./server/config/keys/key.pem', 'utf8');
-		jwt.verify(token, privateKey, { algorithm: "HS256" }, (err, user) => {
-
-			if (err) {
-				res.status(500).json({ error: "Not Authorized" });
-				throw new Error("Not Authorized");
-			}
-			return next();
-		});
-	} else {
-		res.status(500).json({ error: "Not Authorized" });
-		throw new Error("Not Authorized");
-	}
-}
 
 module.exports = router;
