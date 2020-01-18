@@ -21,5 +21,17 @@ export default {
         track
       },
     })
+  },
+
+  getTracks: async function (store, offset, limit) {
+    return request({
+      url: "/getTracks",
+      method: "get",
+      params: {
+        queueID: store.getters["queue/getQueueID"],
+        offset,
+        limit
+      }
+    })
   }
 }
