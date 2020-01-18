@@ -22,10 +22,7 @@ import Preview from "./Preview";
     },
     methods: {
       refresh: async function() {
-        console.log("Refresh Queue");
         var result = await api.queue.getTracks(this.$store, 0, 20);
-
-        console.log(result.data.tracks)
 
         if (result.data.tracks) {
           this.tracks = result.data.tracks;

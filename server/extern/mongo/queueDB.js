@@ -1,7 +1,7 @@
 const { DBConnection } = require("./dbConnection.js");
 
 var queueDB = {
-  createQueue: async function (queue) {
+  createQueue: async function(queue) {
     var db = await loadQueuesCollection();
     db.insertOne(queue);
   },
@@ -26,6 +26,22 @@ var queueDB = {
       {
         $push: { tracks: track }
       }
+    );
+  },
+
+  voteTrack: async function(queueID, trackID) {
+    var db = await loadQueuesCollection();
+
+    return await db.updateOne(
+      {
+        queueID: queueID,
+        "tracks.id": trackID
+      },
+      {
+        $inc: { "tracks.$.votes": 1 }
+      },
+      false,
+      true
     );
   }
 };

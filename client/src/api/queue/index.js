@@ -33,5 +33,16 @@ export default {
         limit
       }
     })
+  },
+
+  voteTrack: async function (store, trackID) {
+    return request({
+      url: "/voteTrack",
+      method: "put",
+      params: {
+        queueID: store.getters["queue/getQueueID"],
+        trackID
+      }
+    })
   }
 }
