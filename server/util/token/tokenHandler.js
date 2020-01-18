@@ -2,7 +2,7 @@ const fs = require('fs')
 const jwt = require('jsonwebtoken');
 
 var env = process.env.NODE_ENV || 'development';
-const credentials = require('./../config/credentials')[env];
+const credentials = require('./../../config/credentials')[env];
 
 const tokenKey = fs.readFileSync('./server/config/keys/jwt_key.pem', 'utf8');
 const refreshKey = fs.readFileSync('./server/config/keys/refresh_key.pem', 'utf8');

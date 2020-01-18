@@ -1,6 +1,6 @@
 const util = require("../../util/");
 const config = require("../../config");
-const jwt = require("../../util/tokenHandler");
+const jwt = require("../../util/token/tokenHandler");
 
 const querystring = require("querystring");
 const express = require("express");

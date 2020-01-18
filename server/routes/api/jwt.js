@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const tokenHandler = require('../../util/tokenHandler');
-const tokenChecker = require('../../util/tokenChecker');
+const tokenHandler = require('../../util/token/tokenHandler');
+const tokenChecker = require('../../util/token/tokenChecker');
 const express = require("express");
 
 const router = express.Router();
