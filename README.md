@@ -1,4 +1,4 @@
-#QUEUE - A Collective Listening Queue For Spotify
+# QUEUE - A Collective Listening Queue For Spotify
 
 CREATED BY: Robin Ostner
 
