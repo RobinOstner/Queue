@@ -2,8 +2,7 @@
   <div class="preview">
     <h2 class="title">{{ title }}</h2>
     <h3 class="artist">{{ artist }}</h3>
-    <button @click="add">Add To Queue</button>
-    <button @click="play">Play</button>
+    <button @click="vote">Vote</button>
   </div>
 </template>
 
@@ -12,17 +11,10 @@
   import api from "@/api";
 
   export default Vue.component("preview", {
-    props: ["id", "title", "artist"],
+    props: ["id", "title", "artist", "votes"],
     methods: {
-      add: async function() {
-        var result = await api.queue.addTrack(this.$store, {
-          id: this.id,
-          title: this.title,
-          artist: this.artist
-        });
-      },
-      play: function() {
-        api.spotify.player.play(["spotify:track:" + this.id]);
+      vote: async function() {
+        api.queue.voteTrack(this.$store, this.id);
       }
     }
   });

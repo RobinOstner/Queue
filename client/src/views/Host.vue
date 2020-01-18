@@ -2,7 +2,10 @@
   <div class="container">
     <h1 class="title">HOST</h1>
     <h2 class="id">{{ queueID() }}</h2>
-    <search/>
+    <div class="layout">
+      <search class="column"/>
+      <queue class="column"/>
+    </div>
   </div>
 </template>
 
@@ -10,16 +13,18 @@
   import { mapActions, mapGetters } from "vuex";
   import axios from "axios";
 
-  import Search from "@/components/Search"
+  import Search from "@/components/Search";
+  import Queue from "@/components/Queue";
 
   export default {
     name: "Host",
     components: {
-      Search
+      Search,
+      Queue
     },
     methods: {
       ...mapGetters("queue", {
-        queueID: "getQueueID",
+        queueID: "getQueueID"
       }),
       ...mapActions("auth", ["setAccessToken", "setRefreshToken", "setExpiryTime"])
     },
@@ -39,7 +44,7 @@
         this.setExpiryTime(expires_in);
         this.$router.push("/host");
         this.$store.dispatch("player/init", null, { root: true });
-        this.$store.dispatch("queue/createQueue", null, {root: true});
+        this.$store.dispatch("queue/createQueue", null, { root: true });
       }
     }
   };
@@ -49,5 +54,14 @@
   .container {
     h1 {
     }
+  }
+
+  .layout {
+    display: flex;
+
+  }
+
+  .column {
+    flex: 50%;
   }
 </style>
