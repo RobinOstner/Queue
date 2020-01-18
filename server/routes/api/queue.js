@@ -1,6 +1,7 @@
 const util = require("../../util/");
 const config = require("../../config");
 const jwt = require("../../util/token/tokenHandler");
+const tokenChecker = require('../../util/token/tokenChecker');
 
 const querystring = require("querystring");
 const express = require("express");
@@ -25,7 +26,7 @@ router.post("/createQueue", async (req, res) => {
   };
 
   queueDB.createQueue(queue);
-  let accessTokens = jwt.createInitialTokenSet(queueID);
+  let accessTokens = jwt.createInitialTokenSet(queueTokenSalt);
 
   res.status(201).json({
     id: queueID,
@@ -40,22 +41,22 @@ router.post("/joinQueue", async (req, res) => {
     if (!queue) {
       res.status(404).send({error: "No queue found"});
     }
-    res.send(jwt.createInitialTokenSet(queueId))
+    res.send(jwt.createInitialTokenSet(queue.queueTokenSalt))
   });
 });
 
-router.delete("/closeQueue", async (req, res) => {
+router.delete("/closeQueue", tokenChecker, async (req, res) => {
   res.send();
   var id = parseInt(req.query.id);
 
   queueDB.closeQueue(id);
 });
 
-router.get("/queueAll", async (req, res) => {
+router.get("/queueAll", tokenChecker, async (req, res) => {
   res.send(loadQueuesCollection().toArray());
 });
 
-router.post("/addTrack", async (req, res) => {
+router.post("/addTrack", tokenChecker, async (req, res) => {
   var queueID = parseInt(req.body.queueID);
 
   if (!queueDB.queueExists(queueID)) {
@@ -73,7 +74,7 @@ router.post("/addTrack", async (req, res) => {
   res.send();
 });
 
-router.get("/getTracks", async (req, res) => {
+router.get("/getTracks", tokenChecker, async (req, res) => {
   var queueID = parseInt(req.query.queueID);
 
   var queue = await queueDB.queueExists(queueID);
@@ -117,7 +118,7 @@ router.get("/getTracks", async (req, res) => {
   });
 });
 
-router.put("/voteTrack", async (req, res) => {
+router.put("/voteTrack", tokenChecker, async (req, res) => {
   var queueID = parseInt(req.query.queueID);
   var trackID = req.query.trackID;
 

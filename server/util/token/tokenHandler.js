@@ -10,9 +10,7 @@ const tokenKey = credentials.jwt.hostAccessTokenSecret;
 const refreshKey = credentials.jwt.hostRefreshTokenSecret;
 
 module.exports = {
-	createInitialTokenSet: function (queueID) {
-		let salt = queueDB.queueExists(queueID).queueTokenSalt;
-
+	createInitialTokenSet: function (salt) {
 		let tokenSet = {
 			"token": createToken(tokenKey + salt, credentials.jwt.tokenLife),
 			"refreshToken": createToken(refreshKey + salt, credentials.jwt.refreshTokenLife)
@@ -20,12 +18,7 @@ module.exports = {
 
 		return tokenSet;
 	},
-	tokenExist: function (refreshToken) {
-		return tokenList[refreshToken];
-	},
-	tokenRefresh: function (refreshToken, queueID) {
-		let salt = queueDB.queueExists(queueID).queueTokenSalt;
-
+	tokenRefresh: function (refreshToken, salt) {
 		let newToken = createToken(tokenKey + salt, credentials.jwt.tokenLife);
 
 		return newToken;
