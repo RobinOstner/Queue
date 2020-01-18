@@ -4,12 +4,15 @@ const jwt = require('jsonwebtoken');
 var env = process.env.NODE_ENV || 'development';
 const credentials = require('./../../config/credentials')[env];
 
-const tokenKey = fs.readFileSync('./server/config/keys/jwt_key.pem', 'utf8');
+const queueDB = require("./../../extern/mongo/queueDB");
+
+const tokenKey = credentials.jwt.hostAccessTokenSecret;
 
 module.exports = (req, res, next) => {
 	let token = req.body.token || req.query.token || req.headers['x-access-token'] || req.headers.authorization;
+	let queueID = req.headers['x-queue-id'];
 
-	if(!token || !token.startsWith('Bearer ')) {
+	if(!token || !token.startsWith('Bearer ') || !queueID) {
 		return res.status(403).send({
 			"error": true,
 			"message": 'No token provided.'
@@ -17,8 +20,9 @@ module.exports = (req, res, next) => {
 	}
 
 	token = token.slice(7, token.length).trimLeft();
+	let salt = queueDB.queueExists(queueID).queueTokenSalt;
 
-	jwt.verify(token, tokenKey, function(err, decoded) {
+	jwt.verify(token, tokenKey + salt, function(err, decoded) {
 		if (err) {
 			return res.status(401).json({"error": true, "message": 'Unauthorized access.' });
 		}
