@@ -1,14 +1,16 @@
 <template>
   <div>
     <button @click="refresh">Refresh Queue</button>
-    <preview v-for="track in tracks" :key="track.id" :id="track.id" :title="track.title" :artist="track.artist" :votes="track.votes"/>
+    <transition-group name="flip-list">
+      <preview v-for="track in tracks" :key="track.id" :id="track.id" :title="track.title" :artist="track.artist" :votes="track.votes" />
+    </transition-group>
   </div>
 </template>
 
 <script>
-import api from "@/api";
+  import api from "@/api";
 
-import Preview from "./Preview";
+  import Preview from "./Preview";
 
   export default {
     name: "queue",
@@ -18,16 +20,16 @@ import Preview from "./Preview";
     data: function() {
       return {
         tracks: [],
-        refreshTimer: ''
-      }
+        refreshTimer: ""
+      };
     },
-    created () {
+    created() {
       this.refresh();
       this.refreshTimer = setInterval(this.refresh, this.$store.getters["queue/getRefreshTime"]);
     },
     methods: {
       refresh: async function() {
-        if (!this.$store.getters["queue/getQueueID"]){
+        if (!this.$store.getters["queue/getQueueID"]) {
           return;
         }
 
@@ -45,4 +47,7 @@ import Preview from "./Preview";
 </script>
 
 <style lang="scss" scoped>
+.flip-list-move {
+  transition: transform 1s;
+}
 </style>
