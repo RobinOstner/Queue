@@ -19,15 +19,13 @@ export default {
     });
   },
 
-  play(context_uri, offset, uris) {
+  play(uris) {
     return request({
       method: "put",
       url: "me/player/play",
-      data: {
-        offset,
+      data: JSON.stringify({
         uris,
-        ...(context_uri && { context_uri })
-      }
+      })
     });
   },
 
