@@ -10,5 +10,16 @@ export default {
     return request.delete("/closeQueue?" + querystring.stringify({
       id: queueID,
     }));
+  },
+
+  addTrack: async function (store, track) {
+    return request({
+      url: "/addTrack",
+      method: "post",
+      data: JSON.stringify({
+        queueID: store.getters["queue/getQueueID"],
+        track
+      }),
+    })
   }
 }
