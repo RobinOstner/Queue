@@ -37,6 +37,9 @@ import Preview from "./Preview";
           this.tracks = result.data.tracks;
         }
       }
+    },
+    beforeDestroy() {
+      clearInterval(this.refreshTimer);
     }
   };
 </script>
