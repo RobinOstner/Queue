@@ -2,10 +2,12 @@ import api from "@/api";
 
 const state = {
   id: "",
+  refreshTime: 2500,
 }
 
 const getters = {
   getQueueID: state => state.id,
+  getRefreshTime: state => state.refreshTime,
 }
 
 const mutations = {

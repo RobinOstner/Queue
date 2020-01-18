@@ -1,4 +1,5 @@
 const config = {
+  serverURL: 'http://localhost:5000/',
   clientURL: 'http://localhost:8080/',
 
   spotifyAPI: 'https://api.spotify.com/v1/',
