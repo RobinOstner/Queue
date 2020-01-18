@@ -20,8 +20,6 @@
           title: this.title,
           artist: this.artist
         });
-
-        console.log(result);
       },
       play: function() {
         api.spotify.player.play(["spotify:track:" + this.id]);
