@@ -16,10 +16,10 @@ export default {
     return request({
       url: "/addTrack",
       method: "post",
-      data: JSON.stringify({
+      data: {
         queueID: store.getters["queue/getQueueID"],
         track
-      }),
+      },
     })
   }
 }

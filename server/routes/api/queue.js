@@ -35,11 +35,78 @@ router.delete("/closeQueue", async (req, res) => {
 
   var queues = await loadQueuesCollection();
 
-  queues.deleteOne({queueID: id});
+  queues.deleteOne({ queueID: id });
 });
 
-router.get("/queueAll", async(req, res) => {
+router.get("/queueAll", async (req, res) => {
   res.send(loadQueuesCollection().toArray());
+});
+
+router.post("/addTrack", async (req, res) => {
+  var queueID = parseInt(req.body.queueID);
+
+  var db = await loadQueuesCollection();
+  var queue = await db.findOne({ queueID: queueID });
+
+  if (queue) {
+    var track = req.body.track;
+    track.votes = 1;
+
+    // TODO: Verify Track has needed Information
+    await db.updateOne(
+      {
+        queueID: queueID
+      },
+      {
+        $push: { tracks: track }
+      }
+    );
+
+    res.send();
+  } else {
+    res.status(404).send({
+      message: "Invalid Queue ID!"
+    });
+  }
+});
+
+router.get("/getTracks", async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+
+  var db = await loadQueuesCollection();
+  var queue = await db.findOne({ queueID: queueID });
+
+  if (queue) {
+    var tracks = queue.tracks;
+
+    var limit = parseInt(req.query.limit) || 20;
+    var offset = parseInt(req.query.offset) || 0;
+
+    var paginatedTracks = tracks.slice(offset).slice(0, limit);
+
+    var next =
+      paginatedTracks.length < limit
+        ? null
+        : config.serverURL +
+          "/api/queue/getTracks?" +
+          querystring.stringify({
+            queueID,
+            offset: offset + limit,
+            limit
+          });
+
+    res.send({
+      tracks: paginatedTracks,
+      limit,
+      offset,
+      next,
+      total: tracks.length
+    });
+  } else {
+    res.status(404).send({
+      message: "Invalid Queue ID!"
+    });
+  }
 });
 
 async function loadQueuesCollection() {
