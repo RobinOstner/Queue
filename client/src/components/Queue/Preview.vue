@@ -8,12 +8,13 @@
 
 <script>
   import Vue from "vue";
+  import api from "@/api";
 
   export default Vue.component("preview", {
     props: ["id", "title", "artist", "votes"],
     methods: {
       vote: async function() {
-        
+        api.queue.voteTrack(this.$store, this.id);
       }
     }
   });

@@ -69,6 +69,12 @@ router.get("/getTracks", async (req, res) => {
 
   var tracks = queue.tracks;
 
+  tracks.sort(function (a, b) {
+    if (a.votes < b.votes) return 1;
+    if (a.votes > b.votes) return -1;
+    return 0;
+  });
+
   var limit = parseInt(req.query.limit) || 20;
   var offset = parseInt(req.query.offset) || 0;
 
@@ -92,6 +98,15 @@ router.get("/getTracks", async (req, res) => {
     next,
     total: tracks.length
   });
+});
+
+router.put("/voteTrack", async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+  var trackID = req.query.trackID;
+
+  await queueDB.voteTrack(queueID, trackID);
+
+  res.send();
 });
 
 async function loadQueuesCollection() {
