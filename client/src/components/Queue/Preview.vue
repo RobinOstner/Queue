@@ -2,6 +2,7 @@
   <div class="preview">
     <h2 class="title">{{ title }}</h2>
     <h3 class="artist">{{ artist }}</h3>
+    <p class="votes">Votes: {{ votes }}</p>
     <button @click="vote">Vote</button>
   </div>
 </template>
@@ -31,6 +32,10 @@
   }
 
   .artist {
+    margin: 0;
+  }
+
+  .votes {
     margin: 0;
   }
 </style>

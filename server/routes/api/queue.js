@@ -41,7 +41,9 @@ router.get("/queueAll", async (req, res) => {
 router.post("/addTrack", async (req, res) => {
   var queueID = parseInt(req.body.queueID);
 
-  if (!queueDB.queueExists(queueID)) {
+  var queue = await queueDB.queueExists(queueID);
+
+  if (!queue) {
     res.status(404).send({
       message: "Invalid Queue ID!"
     });
@@ -50,8 +52,23 @@ router.post("/addTrack", async (req, res) => {
   var track = req.body.track;
   track.votes = 1;
 
+  var trackExists = false;
+
+  queue.tracks.some(item => {
+    if (item.id === track.id) {
+      trackExists = true;
+      return true;
+    }
+  });
+
+  if (trackExists) {
+    await queueDB.voteTrack(queueID, req.body.track.id);
+    res.send();
+    return;
+  }
+
   // TODO: Verify Track has needed Information
-  queueDB.addTrack(queueID, track);
+  await queueDB.addTrack(queueID, track);
 
   res.send();
 });
