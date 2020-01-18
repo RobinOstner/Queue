@@ -18,10 +18,19 @@ import Preview from "./Preview";
     data: function() {
       return {
         tracks: [],
+        refreshTimer: ''
       }
+    },
+    created () {
+      this.refresh();
+      this.refreshTimer = setInterval(this.refresh, this.$store.getters["queue/getRefreshTime"]);
     },
     methods: {
       refresh: async function() {
+        if (!this.$store.getters["queue/getQueueID"]){
+          return;
+        }
+
         var result = await api.queue.getTracks(this.$store, 0, 20);
 
         if (result.data.tracks) {
