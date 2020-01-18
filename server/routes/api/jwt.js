@@ -25,4 +25,14 @@ router.get('/isAuthenticated', tokenChecker, (req, res) => {
 	res.json({"message": "Welcome"});
 });
 
+//ToDo remove debug function
+router.get('/customHeader', (req, res) => {
+	console.log(req.headers);
+
+	let isHost = req.headers['x-is-host-flag'];
+	console.log(isHost);
+
+	res.json({"message": "Welcome"});
+});
+
 module.exports = router;

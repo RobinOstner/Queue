@@ -4,29 +4,29 @@ const jwt = require('jsonwebtoken');
 var env = process.env.NODE_ENV || 'development';
 const credentials = require('./../../config/credentials')[env];
 
-const tokenKey = fs.readFileSync('./server/config/keys/jwt_key.pem', 'utf8');
-const refreshKey = fs.readFileSync('./server/config/keys/refresh_key.pem', 'utf8');
+const queueDB = require("./../../extern/mongo/queueDB");
 
-const tokenList = {};
+const tokenKey = credentials.jwt.hostAccessTokenSecret;
+const refreshKey = credentials.jwt.hostRefreshTokenSecret;
 
 module.exports = {
-	createInitialTokenSet: function () {
-		let tokenSet = {
-			"token": createToken(tokenKey, credentials.jwt.tokenLife),
-			"refreshToken": createToken(refreshKey, credentials.jwt.refreshTokenLife)
-		};
+	createInitialTokenSet: function (queueID) {
+		let salt = queueDB.queueExists(queueID).queueTokenSalt;
 
-		tokenList[tokenSet.refreshToken] = tokenSet;
+		let tokenSet = {
+			"token": createToken(tokenKey + salt, credentials.jwt.tokenLife),
+			"refreshToken": createToken(refreshKey + salt, credentials.jwt.refreshTokenLife)
+		};
 
 		return tokenSet;
 	},
 	tokenExist: function (refreshToken) {
 		return tokenList[refreshToken];
 	},
-	tokenRefresh: function (refreshToken) {
-		let newToken = createToken(tokenKey, credentials.jwt.tokenLife);
+	tokenRefresh: function (refreshToken, queueID) {
+		let salt = queueDB.queueExists(queueID).queueTokenSalt;
 
-		tokenList[refreshToken].token = newToken;
+		let newToken = createToken(tokenKey + salt, credentials.jwt.tokenLife);
 
 		return newToken;
 	},

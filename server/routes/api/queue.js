@@ -16,32 +16,32 @@ router.post("/createQueue", async (req, res) => {
     foundUniqueKey = ! await queueDB.queueExists(queueID);
   }
 
+  let queueTokenSalt = util.generateRandomString(16);
+
   var queue = {
     queueID,
+    queueTokenSalt,
     tracks: []
-  }
+  };
 
   queueDB.createQueue(queue);
+  let accessTokens = jwt.createInitialTokenSet(queueID);
 
   res.status(201).json({
-    id: queueID
+    id: queueID,
+    jwt: accessTokens
   });
 });
 
 router.post("/joinQueue", async (req, res) => {
-  const postData = req.body;
-  let queue = {
-    "id": postData.queue,
-  };
+  const queueId = req.body.id;
 
-  //ToDo check if queue exists
-  queue = true;
-
-  if(!queue) {
-    res.status(500).json({error: "Not Authorized"});
-  }
-
-  res.send(jwt.createInitialTokenSet())
+  queueDB.queueExists(queueId).then(queue => {
+    if (!queue) {
+      res.status(404).send({error: "No queue found"});
+    }
+    res.send(jwt.createInitialTokenSet(queueId))
+  });
 });
 
 router.delete("/closeQueue", async (req, res) => {
