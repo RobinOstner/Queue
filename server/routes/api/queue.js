@@ -1,5 +1,6 @@
 const util = require("../../util/");
 const config = require("../../config");
+const jwt = require("../../util/tokenHandler");
 
 const querystring = require("querystring");
 const express = require("express");
@@ -27,6 +28,22 @@ router.post("/createQueue", async (req, res) => {
   res.status(201).json({
     id: queueID
   });
+});
+
+router.post("/joinQueue", async (req, res) => {
+  const postData = req.body;
+  let queue = {
+    "id": postData.queue,
+  };
+
+  //ToDo check if queue exists
+  queue = true;
+
+  if(!queue) {
+    res.status(500).json({error: "Not Authorized"});
+  }
+
+  res.send(jwt.createInitialTokenSet())
 });
 
 router.delete("/closeQueue", async (req, res) => {
