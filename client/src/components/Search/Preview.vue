@@ -13,13 +13,26 @@
 
   export default Vue.component("preview", {
     props: ["id", "title", "artist"],
+    computed: {
+      voted: function() {
+        var votedTracks = this.$store.getters["queue/getVotedTracks"];
+        return votedTracks.includes(this.id);
+      }
+    },
     methods: {
       add: async function() {
-        var result = await api.queue.addTrack(this.$store, {
-          id: this.id,
-          title: this.title,
-          artist: this.artist
-        });
+        if (this.voted) {
+          api.queue.unvoteTrack(this.$store, this.id);
+          this.$store.commit("queue/REMOVE_VOTED_TRACK", this.id);
+        } else {
+          this.$store.commit("queue/ADD_VOTED_TRACK", this.id);
+
+          var result = await api.queue.addTrack(this.$store, {
+            id: this.id,
+            title: this.title,
+            artist: this.artist
+          });
+        }
       },
       play: function() {
         api.spotify.player.play(["spotify:track:" + this.id]);

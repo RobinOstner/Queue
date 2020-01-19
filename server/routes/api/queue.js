@@ -126,6 +126,23 @@ router.put("/voteTrack", async (req, res) => {
   res.send();
 });
 
+router.put("/unvoteTrack", async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+  var trackID = req.query.trackID;
+
+  await queueDB.unvoteTrack(queueID, trackID);
+
+  
+  var track = await queueDB.getTrack(queueID, trackID);
+
+  console.log(track);
+
+  if (track.votes == 0) {
+    console.log("Remove Track");
+  }
+  res.send();
+})
+
 async function loadQueuesCollection() {
   const client = await DBConnection.connect();
   return client.db("queue").collection("queues");
