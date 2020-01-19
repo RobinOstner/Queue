@@ -1,7 +1,7 @@
 const MongoClient = require('mongodb').MongoClient
 
 var env = process.env.NODE_ENV || 'development';
-const credentials = require('../../config/credentials')[env]
+const credentials = require('./../../config/credentials')[env]
 
 
 
