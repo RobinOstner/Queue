@@ -9,7 +9,7 @@ router.post('/refreshToken', (req, res) => {
 	const postData = req.body;
 
 	if (!((postData.refreshToken) && (tokenHandler.tokenExist(postData.refreshToken)))) {
-		res.status(404).send('Invalid request')
+		res.status(404).send('Invalid apiRequest')
 	}
 
 	let token = tokenHandler.tokenRefresh(postData.refreshToken);
