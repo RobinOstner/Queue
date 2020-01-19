@@ -70,7 +70,9 @@ router.get("/queueAll", tokenChecker, async (req, res) => {
 router.post("/addTrack", tokenChecker, async (req, res) => {
   var queueID = parseInt(req.body.queueID);
 
-  if (!queueDB.queueExists(queueID)) {
+  var queue = await queueDB.queueExists(queueID);
+
+  if (!queue) {
     res.status(404).send({
       message: "Invalid Queue ID!"
     });
@@ -79,8 +81,23 @@ router.post("/addTrack", tokenChecker, async (req, res) => {
   var track = req.body.track;
   track.votes = 1;
 
+  var trackExists = false;
+
+  queue.tracks.some(item => {
+    if (item.id === track.id) {
+      trackExists = true;
+      return true;
+    }
+  });
+
+  if (trackExists) {
+    await queueDB.voteTrack(queueID, req.body.track.id);
+    res.send();
+    return;
+  }
+
   // TODO: Verify Track has needed Information
-  queueDB.addTrack(queueID, track);
+  await queueDB.addTrack(queueID, track);
 
   res.send();
 });
@@ -137,6 +154,23 @@ router.put("/voteTrack", tokenChecker, async (req, res) => {
 
   res.send();
 });
+
+router.put("/unvoteTrack", async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+  var trackID = req.query.trackID;
+
+  await queueDB.unvoteTrack(queueID, trackID);
+
+  
+  var track = await queueDB.getTrack(queueID, trackID);
+
+  console.log(track);
+
+  if (track.votes == 0) {
+    console.log("Remove Track");
+  }
+  res.send();
+})
 
 async function loadQueuesCollection() {
   const client = await DBConnection.connect();

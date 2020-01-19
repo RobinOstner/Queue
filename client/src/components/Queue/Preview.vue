@@ -2,7 +2,8 @@
   <div class="preview">
     <h2 class="title">{{ title }}</h2>
     <h3 class="artist">{{ artist }}</h3>
-    <button @click="vote">Vote</button>
+    <p class="votes">Votes: {{ votes }}</p>
+    <button @click="voteClicked">{{this.voted ? "Unvote" : "Vote"}}</button>
   </div>
 </template>
 
@@ -12,9 +13,21 @@
 
   export default Vue.component("preview", {
     props: ["id", "title", "artist", "votes"],
+    computed: {
+      voted: function () {
+        var votedTracks = this.$store.getters["queue/getVotedTracks"];
+        return votedTracks.includes(this.id);
+      }
+    },
     methods: {
-      vote: async function() {
-        api.queue.voteTrack(this.$store, this.id);
+      voteClicked: async function() {
+        if (this.voted) {
+          api.queue.unvoteTrack(this.$store, this.id);
+          this.$store.commit("queue/REMOVE_VOTED_TRACK", this.id);
+        } else {
+          api.queue.voteTrack(this.$store, this.id);
+          this.$store.commit("queue/ADD_VOTED_TRACK", this.id);
+        }
       }
     }
   });
@@ -31,6 +44,10 @@
   }
 
   .artist {
+    margin: 0;
+  }
+
+  .votes {
     margin: 0;
   }
 </style>
