@@ -3,6 +3,9 @@ const config = require("../../config");
 const jwt = require("../../util/token/tokenHandler");
 const tokenChecker = require('../../util/token/tokenChecker');
 
+var env = process.env.NODE_ENV || 'development';
+const credential = require('./../../config/credentials')[env];
+
 const querystring = require("querystring");
 const express = require("express");
 const { DBConnection } = require("../../extern/mongo/dbConnection.js");

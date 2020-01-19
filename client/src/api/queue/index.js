@@ -4,6 +4,7 @@ import querystring from "querystring";
 let endpoint = "queue";
 
 export default {
+  //ToDo adapt origin
   createQueue: async function () {
     return request.post(endpoint + "/createQueue", {}, {
       withCredentials: true,

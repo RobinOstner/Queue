@@ -16,11 +16,6 @@ module.exports = {
 
 		return tokenSet;
 	},
-	tokenRefresh: function (refreshToken, salt) {
-		let newToken = createToken(tokenKey + salt, credentials.jwt.tokenLife);
-
-		return newToken;
-	},
 };
 
 function createToken(key, expTime) {

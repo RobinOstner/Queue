@@ -1,4 +1,6 @@
 import store from './../../store';
+import jwt from "./../jwt/index"
+import { RetryError } from "./../../exception/retryError"
 
 export default function apiJwtToken(axios) {
 
@@ -25,7 +27,22 @@ export default function apiJwtToken(axios) {
 		}
 
 		return response;
-	},  function(err) {
+	},  async function(err) {
+		if(err.response.status == 401) {
+			let error = err.response.data.error;
+
+			if(error.code == 1 && error.subcode == 1) {
+				var respones = await jwt.refreshToken()
+				console.log(respones.data.req);
+				return Promise.reject(new RetryError("user credentials refreshed"))
+			}
+
+			if(error.code == 1 && error.subcode == 2) {
+				//ToDo unauthoorized flow
+				console.log("unauthorized flow")
+			}
+		}
+
 		return Promise.reject(err);
 	});
 }

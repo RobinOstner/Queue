@@ -25,8 +25,21 @@ module.exports = async (req, res, next) => {
 
 	jwt.verify(token, tokenKey + salt, function (err, decoded) {
 		if (err) {
-			console.log(err);
-			return res.status(401).json({"error": true, "message": 'Unauthorized access.'});
+			if(err instanceof jwt.TokenExpiredError) {
+				return res.status(401).json({"error": {
+					"message" : "Error validating access token: Session expired",
+						"type": "AuthException",
+						"code": 1,
+						"subcode": 1
+					}})
+			}
+
+			return res.status(401).json({"error": {
+					"message" : "Error validating access token: Unauthorized access",
+					"type": "AuthException",
+					"code": 1,
+					"subcode": 2
+				}}).send();
 		}
 		req.decoded = decoded;
 		next();

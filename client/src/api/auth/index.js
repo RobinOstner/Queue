@@ -1,4 +1,3 @@
-//import request from "./request";
 import request from "./../apiRequest";
 
 export default {
