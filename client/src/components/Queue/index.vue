@@ -10,7 +10,9 @@
 <script>
   import api from "@/api";
 
-  import Preview from "./Preview";
+import Preview from "./Preview";
+import { RetryError } from "./../../exception/retryError";
+
 
   export default {
     name: "queue",
@@ -33,11 +35,19 @@
           return;
         }
 
-        var result = await api.queue.getTracks(this.$store, 0, 20);
-
-        if (result.data.tracks) {
-          this.tracks = result.data.tracks;
-        }
+        api.queue.getTracks(this.$store, 0, 20).then( res => {
+          if (res.data.tracks) {
+            this.tracks = res.data.tracks;
+          }
+        }).catch( err => {
+            if(err instanceof RetryError) {
+              api.queue.getTracks(this.$store, 0, 20).then( res => {
+                if (res.data.tracks) {
+                  this.tracks = res.data.tracks;
+                }
+              })
+            }
+        });
       }
     },
     beforeDestroy() {

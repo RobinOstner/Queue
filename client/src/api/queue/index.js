@@ -1,20 +1,26 @@
-import request from "./request";
+import request from "./../apiRequest";
 import querystring from "querystring";
 
+let endpoint = "queue";
+
 export default {
+  //ToDo adapt origin
   createQueue: async function () {
-    return request.post("/createQueue");
+    return request.post(endpoint + "/createQueue", {}, {
+      withCredentials: true,
+      origin: 'http://localhost:8080'
+    });
   },
 
   closeQueue: async function (queueID) {
-    return request.delete("/closeQueue?" + querystring.stringify({
+    return request.delete(endpoint + "/closeQueue?" + querystring.stringify({
       id: queueID,
     }));
   },
 
   addTrack: async function (store, track) {
     return request({
-      url: "/addTrack",
+      url: endpoint + "/addTrack",
       method: "post",
       data: {
         queueID: store.getters["queue/getQueueID"],
@@ -25,7 +31,7 @@ export default {
 
   getTracks: async function (store, offset, limit) {
     return request({
-      url: "/getTracks",
+      url: endpoint + "/getTracks",
       method: "get",
       params: {
         queueID: store.getters["queue/getQueueID"],
@@ -37,7 +43,7 @@ export default {
 
   voteTrack: async function (store, trackID) {
     return request({
-      url: "/voteTrack",
+      url: endpoint + "/voteTrack",
       method: "put",
       params: {
         queueID: store.getters["queue/getQueueID"],
