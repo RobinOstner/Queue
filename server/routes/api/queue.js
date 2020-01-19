@@ -28,11 +28,12 @@ router.post("/createQueue", async (req, res) => {
   queueDB.createQueue(queue);
   let accessTokens = jwt.createInitialTokenSet(queueTokenSalt);
 
-  res.setHeader('Set-Cookie', 'refreshToken='+ accessTokens.refreshToken +'; HttpOnly');
+  res.cookie("refreshToken", accessTokens.refreshToken, {httpOnly: true, Secure: true});
+
   res.status(201).json({
     id: queueID,
     token: accessTokens.token,
-  });
+  }).send();
 });
 
 router.post("/joinQueue", async (req, res) => {
@@ -45,7 +46,7 @@ router.post("/joinQueue", async (req, res) => {
 
     let accessTokens = jwt.createInitialTokenSet(queue.queueTokenSalt);
 
-    res.setHeader('Set-Cookie', 'refreshToken='+ accessTokens.refreshToken +'; HttpOnly');
+    res.cookie("refreshToken", accessTokens.refreshToken, {httpOnly: true, Secure: true});
     res.json({
       token: accessTokens.token,
     }).send()
