@@ -4,8 +4,6 @@ const jwt = require('jsonwebtoken');
 var env = process.env.NODE_ENV || 'development';
 const credentials = require('./../../config/credentials')[env];
 
-const queueDB = require("./../../extern/mongo/queueDB");
-
 const tokenKey = credentials.jwt.hostAccessTokenSecret;
 const refreshKey = credentials.jwt.hostRefreshTokenSecret;
 

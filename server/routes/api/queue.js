@@ -28,9 +28,10 @@ router.post("/createQueue", async (req, res) => {
   queueDB.createQueue(queue);
   let accessTokens = jwt.createInitialTokenSet(queueTokenSalt);
 
+  res.setHeader('Set-Cookie', 'refreshToken='+ accessTokens.refreshToken +'; HttpOnly');
   res.status(201).json({
     id: queueID,
-    jwt: accessTokens
+    token: accessTokens.token,
   });
 });
 
@@ -41,7 +42,13 @@ router.post("/joinQueue", async (req, res) => {
     if (!queue) {
       res.status(404).send({error: "No queue found"});
     }
-    res.send(jwt.createInitialTokenSet(queue.queueTokenSalt))
+
+    let accessTokens = jwt.createInitialTokenSet(queue.queueTokenSalt);
+
+    res.setHeader('Set-Cookie', 'refreshToken='+ accessTokens.refreshToken +'; HttpOnly');
+    res.json({
+      token: accessTokens.token,
+    }).send()
   });
 });
 

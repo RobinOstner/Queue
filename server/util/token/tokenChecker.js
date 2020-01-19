@@ -8,9 +8,9 @@ const queueDB = require("./../../extern/mongo/queueDB");
 
 const tokenKey = credentials.jwt.hostAccessTokenSecret;
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
 	let token = req.body.token || req.query.token || req.headers['x-access-token'] || req.headers.authorization;
-	let queueID = req.headers['x-queue-id'];
+	let queueID = parseInt(req.headers['x-queue-id']);
 
 	if(!token || !token.startsWith('Bearer ') || !queueID) {
 		return res.status(403).send({
@@ -20,11 +20,13 @@ module.exports = (req, res, next) => {
 	}
 
 	token = token.slice(7, token.length).trimLeft();
-	let salt = queueDB.queueExists(queueID).queueTokenSalt;
 
-	jwt.verify(token, tokenKey + salt, function(err, decoded) {
+	let salt = (await queueDB.queueExists(queueID)).queueTokenSalt;
+
+	jwt.verify(token, tokenKey + salt, function (err, decoded) {
 		if (err) {
-			return res.status(401).json({"error": true, "message": 'Unauthorized access.' });
+			console.log(err);
+			return res.status(401).json({"error": true, "message": 'Unauthorized access.'});
 		}
 		req.decoded = decoded;
 		next();
