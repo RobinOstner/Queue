@@ -5,7 +5,10 @@ let endpoint = "queue";
 
 export default {
   createQueue: async function () {
-    return request.post(endpoint + "/createQueue");
+    return request.post(endpoint + "/createQueue", {}, {
+      withCredentials: true,
+      origin: 'http://localhost:8080'
+    });
   },
 
   closeQueue: async function (queueID) {
