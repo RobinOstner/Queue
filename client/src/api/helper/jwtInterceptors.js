@@ -3,6 +3,7 @@ import jwt from "./../jwt/index"
 import { RetryError } from "./../../exception/retryError"
 
 export default function apiJwtToken(axios) {
+	let timer;
 
 	axios.interceptors.request.use(function(config) {
 		const accessToken = store.getters["accessTokens/token"];
@@ -24,6 +25,14 @@ export default function apiJwtToken(axios) {
 	axios.interceptors.response.use(function(response) {
 		if (response.data.hasOwnProperty("token")) {
 			store.commit('accessTokens/SET_TOKEN', response.data.token);
+
+			if(timer) {
+				clearTimeout(timer);
+				timer = null;
+			}
+
+			//10 min timer token lasts 15min
+			timer = setTimeout(refreshTokenAfterTime, 600000);
 		}
 
 		return response;
@@ -32,8 +41,8 @@ export default function apiJwtToken(axios) {
 			let error = err.response.data.error;
 
 			if(error.code == 1 && error.subcode == 1) {
-				var respones = await jwt.refreshToken()
-				console.log(respones.data.req);
+				var respones = await jwt.refreshToken();
+
 				return Promise.reject(new RetryError("user credentials refreshed"))
 			}
 
@@ -45,4 +54,9 @@ export default function apiJwtToken(axios) {
 
 		return Promise.reject(err);
 	});
+
+	async function refreshTokenAfterTime() {
+		timer = null;
+		await jwt.refreshToken();
+	}
 }
