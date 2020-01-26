@@ -10,9 +10,10 @@
 <script>
   import api from "@/api";
 
-import Preview from "./Preview";
-import { RetryError } from "./../../exception/retryError";
-
+  import Preview from "./Preview";
+  import { RetryError } from "./../../exception/retryError";
+  import { mapGetters } from "vuex";
+  import { mapMutations } from "vuex";
 
   export default {
     name: "queue",
@@ -25,38 +26,51 @@ import { RetryError } from "./../../exception/retryError";
         refreshTimer: ""
       };
     },
+    computed: {
+      ...mapGetters({
+        refreshTime: "queue/getRefreshTime",
+        queueID: "queue/getQueueID",
+        votedTracks: "queue/getVotedTracks"
+      })
+    },
     created() {
       this.refresh();
-      this.refreshTimer = setInterval(this.refresh, this.$store.getters["queue/getRefreshTime"]);
+      this.refreshTimer = setInterval(this.refresh, this.refreshTime);
     },
     methods: {
+      ...mapMutations({
+        removeVotedTrack: "queue/REMOVE_VOTED_TRACK"
+      }),
       refresh: async function() {
-        if (!this.$store.getters["queue/getQueueID"]) {
+        if (!this.queueID) {
           return;
         }
 
-        api.queue.getTracks(this.$store, 0, 20).then( res => {
-          if (res.data.tracks) {
-            this.tracks = res.data.tracks;
-            this.cleanVotedTracks();
-          }
-        }).catch( err => {
-            if(err instanceof RetryError) {
-              api.queue.getTracks(this.$store, 0, 20).then( res => {
+        api.queue
+          .getTracks(this.$store, 0, 20)
+          .then(res => {
+            if (res.data.tracks) {
+              this.tracks = res.data.tracks;
+              this.cleanVotedTracks();
+            }
+          })
+          .catch(err => {
+            if (err instanceof RetryError) {
+              api.queue.getTracks(this.$store, 0, 20).then(res => {
                 if (res.data.tracks) {
                   this.tracks = res.data.tracks;
                 }
-              })
+              });
             }
-        });
+          });
       },
       cleanVotedTracks: function() {
-        var votedTracks = this.$store.getters["queue/getVotedTracks"];
+        var voted = this.votedTracks;
 
-        votedTracks.forEach( (votedTrack) => {
+        this.votedTracks.forEach(votedTrack => {
           var included = false;
 
-          for (var i=0; i<this.tracks.length; i++) {
+          for (var i = 0; i < this.tracks.length; i++) {
             if (this.tracks[i].id == votedTrack) {
               included = true;
               break;
@@ -64,9 +78,9 @@ import { RetryError } from "./../../exception/retryError";
           }
 
           if (!included) {
-            this.$store.commit("queue/REMOVE_VOTED_TRACK", votedTrack);
+            this.removeVotedTrack(votedTrack);
           }
-        })
+        });
       }
     },
     beforeDestroy() {
@@ -76,7 +90,7 @@ import { RetryError } from "./../../exception/retryError";
 </script>
 
 <style lang="scss" scoped>
-.tracks-move {
-  transition: transform 1s;
-}
+  .tracks-move {
+    transition: transform 1s;
+  }
 </style>

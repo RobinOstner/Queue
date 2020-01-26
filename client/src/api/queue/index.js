@@ -64,7 +64,7 @@ export default {
 
   unvoteTrack: async function (store, trackID) {
     return request({
-      url: "/unvoteTrack",
+      url: endpoint + "/unvoteTrack",
       method: "put",
       params: {
         queueID: store.getters["queue/getQueueID"],
