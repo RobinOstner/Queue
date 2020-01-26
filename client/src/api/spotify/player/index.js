@@ -19,7 +19,14 @@ export default {
     });
   },
 
+  resume(device_id) {
+    return request.put("me/player/play", {
+      device_id
+    });
+  },
+
   play(uris) {
+    console.log("Play Track");
     return request({
       method: "put",
       url: "me/player/play",

@@ -1,7 +1,7 @@
 <template>
   <div>
     <button @click="refresh">Refresh Queue</button>
-    <transition-group name="flip-list">
+    <transition-group name="tracks">
       <preview v-for="track in tracks" :key="track.id" :id="track.id" :title="track.title" :artist="track.artist" :votes="track.votes" />
     </transition-group>
   </div>
@@ -47,7 +47,7 @@
 </script>
 
 <style lang="scss" scoped>
-.flip-list-move {
+.tracks-move {
   transition: transform 1s;
 }
 </style>

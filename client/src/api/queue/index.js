@@ -35,6 +35,16 @@ export default {
     })
   },
 
+  nextTrack: async function (store) {
+    return request({
+      url: "/nextTrack",
+      method: "get",
+      params: {
+        queueID: store.getters["queue/getQueueID"],
+      }
+    })
+  },
+
   voteTrack: async function (store, trackID) {
     return request({
       url: "/voteTrack",

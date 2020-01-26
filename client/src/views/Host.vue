@@ -2,6 +2,7 @@
   <div class="container">
     <h1 class="title">HOST</h1>
     <h2 class="id">{{ queueID() }}</h2>
+    <playback />
     <div class="layout">
       <search class="column"/>
       <queue class="column"/>
@@ -15,12 +16,14 @@
 
   import Search from "@/components/Search";
   import Queue from "@/components/Queue";
+  import Playback from "@/components/Playback";
 
   export default {
     name: "Host",
     components: {
       Search,
-      Queue
+      Queue,
+      Playback
     },
     methods: {
       ...mapGetters("queue", {
