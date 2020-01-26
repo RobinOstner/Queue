@@ -26,7 +26,6 @@ export default {
   },
 
   play(uris) {
-    console.log("Play Track");
     return request({
       method: "put",
       url: "me/player/play",

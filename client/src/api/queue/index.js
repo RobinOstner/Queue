@@ -43,7 +43,7 @@ export default {
 
   nextTrack: async function (store) {
     return request({
-      url: "/nextTrack",
+      url: endpoint + "/nextTrack",
       method: "get",
       params: {
         queueID: store.getters["queue/getQueueID"],

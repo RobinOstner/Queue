@@ -38,6 +38,7 @@ import { RetryError } from "./../../exception/retryError";
         api.queue.getTracks(this.$store, 0, 20).then( res => {
           if (res.data.tracks) {
             this.tracks = res.data.tracks;
+            this.cleanVotedTracks();
           }
         }).catch( err => {
             if(err instanceof RetryError) {
@@ -48,6 +49,24 @@ import { RetryError } from "./../../exception/retryError";
               })
             }
         });
+      },
+      cleanVotedTracks: function() {
+        var votedTracks = this.$store.getters["queue/getVotedTracks"];
+
+        votedTracks.forEach( (votedTrack) => {
+          var included = false;
+
+          for (var i=0; i<this.tracks.length; i++) {
+            if (this.tracks[i].id == votedTrack) {
+              included = true;
+              break;
+            }
+          }
+
+          if (!included) {
+            this.$store.commit("queue/REMOVE_VOTED_TRACK", votedTrack);
+          }
+        })
       }
     },
     beforeDestroy() {

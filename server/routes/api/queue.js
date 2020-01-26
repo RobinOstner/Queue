@@ -146,7 +146,7 @@ router.get("/getTracks", tokenChecker, async (req, res) => {
   });
 });
 
-router.get("/nextTrack", async (req, res) => {
+router.get("/nextTrack", tokenChecker, async (req, res) => {
   var queueID = parseInt(req.query.queueID);
 
   var queue = await queueDB.queueExists(queueID);
