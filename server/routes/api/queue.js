@@ -146,6 +146,41 @@ router.get("/getTracks", tokenChecker, async (req, res) => {
   });
 });
 
+router.get("/nextTrack", tokenChecker, async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+
+  var queue = await queueDB.queueExists(queueID);
+
+  if (!queue) {
+    res.status(404).send({
+      message: "Invalid Queue ID!"
+    });
+  }
+
+  var tracks = queue.tracks;
+
+  if (tracks.length == 0) {
+    res.status(200).send();
+    return;
+  }
+
+  tracks.sort(function (a, b) {
+    if (a.votes < b.votes) return 1;
+    if (a.votes > b.votes) return -1;
+    return 0;
+  });
+
+  var nextTrack = tracks[0];
+
+  delete nextTrack.votes;
+
+  res.send({
+    track: nextTrack,
+  });
+
+  await queueDB.removeTrack(queueID, nextTrack.id);
+})
+
 router.put("/voteTrack", tokenChecker, async (req, res) => {
   var queueID = parseInt(req.query.queueID);
   var trackID = req.query.trackID;
@@ -162,13 +197,7 @@ router.put("/unvoteTrack", async (req, res) => {
   await queueDB.unvoteTrack(queueID, trackID);
 
   
-  var track = await queueDB.getTrack(queueID, trackID);
-
-  console.log(track);
-
-  if (track.votes == 0) {
-    console.log("Remove Track");
-  }
+  await queueDB.removeTrackIfNoVotes(queueID, trackID);
   res.send();
 })
 

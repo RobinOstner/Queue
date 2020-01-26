@@ -1,19 +1,31 @@
 import api from "@/api";
 
 const state = {
+  player: null,
+
   deviceID: "",
-  playback: "",
-  playbackContext: ""
+  playback: {},
+  playbackContext: {},
+
+  playbackRefreshTime: 2500,
+  maxTimeToEnd: 10000,
 };
 
 const getters = {
+  getPlayer: state => state.player,
   getDeviceID: state => state.deviceID,
   getPlayback: state => state.playback,
   getPlaybackContext: state => state.playbackContext,
-  isPlaying: state => state.playback.is_playing
+  isPlaying: state => state.playback.is_playing,
+  getCurrentTrack: state => state.playback.currentTrack,
+  getPlaybackRefreshTime: state => state.playbackRefreshTime,
+  getMaxTimeToEnd: state => state.maxTimeToEnd,
 };
 
 const mutations = {
+  SET_PLAYER(state, player) {
+    state.player = player;
+  },
   SET_DEVICE_ID(state, deviceID) {
     state.deviceID = deviceID;
   },
@@ -22,7 +34,10 @@ const mutations = {
   },
   SET_PLAYBACK_CONTEXT(state, playback) {
     state.playbackContext = playback;
-  }
+  },
+  SET_CURRENT_TRACK(state, track) {
+    state.currentTrack = track;
+  },
 };
 
 const actions = {
@@ -30,7 +45,7 @@ const actions = {
     window.onSpotifyWebPlaybackSDKReady = () => {};
 
     async function waitForSpotifyWebPlaybackSDKToLoad() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         if (window.Spotify) {
           resolve(window.Spotify);
         } else {
@@ -42,7 +57,7 @@ const actions = {
     }
 
     async function waitUntilUserHasSelectedPlayer(sdk) {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         let interval = setInterval(async () => {
           let state = await sdk.getCurrentState();
           if (state !== null) {
@@ -60,10 +75,12 @@ const actions = {
       // eslint-disable-next-line
       const player = new Player({
         name: "Queue",
-        getOAuthToken: (cb) => {
+        getOAuthToken: cb => {
           cb(token);
         }
       });
+
+      commit("SET_PLAYER", player);
 
       // Error handling
       player.addListener("initialization_error", ({ message }) => {
@@ -84,7 +101,7 @@ const actions = {
       });
 
       // Playback status updates
-      player.addListener("player_state_changed", (state) => {
+      player.addListener("player_state_changed", state => {
         if (state) {
           dispatch("setPlaybackContext", state);
           dispatch("setPlayback");
@@ -113,7 +130,7 @@ const actions = {
     })();
   },
 
-  async setPlayback({ commit }) {
+  async setPlayback({ dispatch, commit }) {
     try {
       const response = await api.spotify.player.getCurrentPlayback();
       commit("SET_PLAYBACK", response.data);
@@ -124,6 +141,15 @@ const actions = {
 
   setPlaybackContext({ commit }, context) {
     commit("SET_PLAYBACK_CONTEXT", context);
+  },
+
+  async setCurrentTrack({ commit }, track) {
+    console.log("Set Current Track");
+    try {
+      commit("SET_CURRENT_TRACK", track);
+    } catch (e) {
+      console.log(e);
+    }
   }
 };
 

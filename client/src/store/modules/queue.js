@@ -4,12 +4,14 @@ const state = {
   id: "",
   refreshTime: 2500,
   votedTracks: [],
+  nextTrackWillPlay: false,
 }
 
 const getters = {
   getQueueID: state => state.id,
   getRefreshTime: state => state.refreshTime,
   getVotedTracks: state => state.votedTracks,
+  getNextTrackWillPlay: state => state.nextTrackIsAboutToPlay,
 }
 
 const mutations = {
@@ -23,6 +25,10 @@ const mutations = {
 
   REMOVE_VOTED_TRACK(state, trackID) {
     state.votedTracks.splice(state.votedTracks.indexOf(trackID), 1);
+  },
+
+  SET_NEXT_TRACK_WILL_PLAY(state, value) {
+    state.nextTrackIsAboutToPlay = value;
   }
 }
 

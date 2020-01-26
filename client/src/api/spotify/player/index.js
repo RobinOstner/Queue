@@ -19,6 +19,12 @@ export default {
     });
   },
 
+  resume(device_id) {
+    return request.put("me/player/play", {
+      device_id
+    });
+  },
+
   play(uris) {
     return request({
       method: "put",

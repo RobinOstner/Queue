@@ -2,7 +2,7 @@
   <div class="preview">
     <h2 class="title">{{ title }}</h2>
     <h3 class="artist">{{ artist }}</h3>
-    <button @click="add">Add To Queue</button>
+    <button @click="add">{{this.voted ? "Unvote" : "Add To Queue"}}</button>
     <button @click="play">Play</button>
   </div>
 </template>

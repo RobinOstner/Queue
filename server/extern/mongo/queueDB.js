@@ -61,7 +61,19 @@ var queueDB = {
     );
   },
 
-  getTrack: async function(queueID, trackID) {
+  removeTrackIfNoVotes: async function(queueID, trackID) {
+    var db = await loadQueuesCollection();
+    return db.updateOne(
+      {
+        queueID: queueID
+      },
+      {
+        $pull: {tracks: {id: {$in: [trackID]}, votes: 0}}
+      }
+    );
+  },
+
+  removeTrack: async function (queueID, trackID) {
     var db = await loadQueuesCollection();
     return db.updateOne(
       {
