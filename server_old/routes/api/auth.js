@@ -3,7 +3,8 @@ var config = require("../../config");
 var querystring = require("querystring");
 var request = require("request");
 
-const router = require("express").Router();
+const express = require("express");
+const router = express.Router();
 
 router.get("/login", (req, res) => {
 	var state = util.generateRandomString(16);
@@ -18,7 +19,7 @@ router.get("/login", (req, res) => {
 		"authorize?" +
 		querystring.stringify({
 			response_type: "code",
-			client_id: process.env.CLIENT_ID,
+			client_id: config.client_id,
 			scope: scope,
 			redirect_uri: config.redirect_uri,
 			state: state
@@ -47,7 +48,7 @@ router.get("/loginCallback", (req, res) => {
 				grant_type: "authorization_code"
 			},
 			headers: {
-				Authorization: "Basic " + new Buffer(process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET).toString("base64")
+				Authorization: "Basic " + new Buffer(config.client_id + ":" + config.client_secret).toString("base64")
 			},
 			json: true
 		};

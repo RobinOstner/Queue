@@ -1,111 +1,115 @@
-const util = require("../../util/");
-const config = require("../../config");
-const jwt = require("../../util/token/tokenHandler");
-const tokenChecker = require('../../util/token/tokenChecker');
+const router = require("express").Router();
 
-var env = process.env.NODE_ENV || 'development';
-const credential = require('./../../config/credentials')[env];
+const Queue = require('../../model/Queue');
+const Track = require('../../model/Track');
+const util = require('../../util/index');
+const jwtTokenGen = require("../../util/token/tokenHandler");
+const jwtTokenCheck = require("../../util/token/tokenChecker");
 
-const querystring = require("querystring");
-const express = require("express");
-const { DBConnection } = require("../../extern/mongo/dbConnection.js");
-const queueDB = require("../../extern/mongo/queueDB");
 
-const router = express.Router();
-
-router.post("/createQueue", async (req, res) => {
-  var foundUniqueKey = false;
-  while (!foundUniqueKey) {
-    var queueID = util.generateNewQueueID();
-    foundUniqueKey = ! await queueDB.queueExists(queueID);
-  }
-
-  let queueTokenSalt = util.generateRandomString(16);
-
-  var queue = {
-    queueID,
-    queueTokenSalt,
-    tracks: []
-  };
-
-  queueDB.createQueue(queue);
-  let accessTokens = jwt.createInitialTokenSet(queueTokenSalt);
-
-  res.cookie("refreshToken", accessTokens.refreshToken, {httpOnly: true, Secure: true});
-
-  res.status(201).json({
-    id: queueID,
-    token: accessTokens.token,
-  }).send();
-});
-
-router.post("/joinQueue", async (req, res) => {
-  const queueId = req.body.id;
-
-  queueDB.queueExists(queueId).then(queue => {
-    if (!queue) {
-      res.status(404).send({error: "No queue found"});
+router.post('/createQueue', async (req, res) => {
+    var foundUniqueKey = false;
+    while (!foundUniqueKey) {
+      var queueID = util.generateNewQueueID();
+      foundUniqueKey = ! await Queue.findOne({queueId: queueID});
     }
+  
+    let queueTokenSalt = util.generateRandomString(16);
 
-    let accessTokens = jwt.createInitialTokenSet(queue.queueTokenSalt);
-
-    res.cookie("refreshToken", accessTokens.refreshToken, {httpOnly: true, Secure: true});
-    res.json({
-      token: accessTokens.token,
-    }).send()
-  });
-});
-
-router.delete("/closeQueue", tokenChecker, async (req, res) => {
-  res.send();
-  var id = parseInt(req.query.id);
-
-  queueDB.closeQueue(id);
-});
-
-router.get("/queueAll", tokenChecker, async (req, res) => {
-  res.send(loadQueuesCollection().toArray());
-});
-
-router.post("/addTrack", tokenChecker, async (req, res) => {
-  var queueID = parseInt(req.body.queueID);
-
-  var queue = await queueDB.queueExists(queueID);
-
-  if (!queue) {
-    res.status(404).send({
-      message: "Invalid Queue ID!"
+    const queue = new Queue({
+        queueId: queueID,
+        tokenSalt: queueTokenSalt
     });
-  }
 
-  var track = req.body.track;
-  track.votes = 1;
+    try {
+        const savedQueue = await queue.save();
 
-  var trackExists = false;
+        let refreshToken = jwtTokenGen.createRefreshTokenHost(savedQueue.tokenSalt);
+        res.cookie("refreshToken", refreshToken, {httpOnly: true, Secure: true});
 
-  queue.tracks.some(item => {
-    if (item.id === track.id) {
-      trackExists = true;
-      return true;
+        res.status(201).send( {
+            queueId: savedQueue.queueId,
+            tracks: savedQueue.tracks,
+            token: jwtTokenGen.signHostData(savedQueue.tokenSalt, {queueId: savedQueue.queueId, tracks: savedQueue.tracks})
+        } );
+    } catch(err) {
+        console.log(err);
+        res.status(400).send(err);
     }
-  });
-
-  if (trackExists) {
-    await queueDB.voteTrack(queueID, req.body.track.id);
-    res.send();
-    return;
-  }
-
-  // TODO: Verify Track has needed Information
-  await queueDB.addTrack(queueID, track);
-
-  res.send();
 });
 
-router.get("/getTracks", tokenChecker, async (req, res) => {
+//ToDo check if actual object id is used or queueId
+router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
+  var id = parseInt(req.query.id);
+  Queue.deleteOne({ queueId: id}, function(err) {
+      res.status(204).send(err)
+  });
+
+  res.status(200).send();
+});
+
+//ToDo check if needed
+router.get("/queueAll", async (req, res) => {
+    await Queue.find({})
+    .where(queueId).gt(0)
+    .select('queueId tracks')
+    .exec()
+    .then( (queues) => {
+        res.send(queues);
+    }).catch( (err) => {
+        console.log(err);
+    });
+});
+
+router.post("/addTrack", async (req, res) => {
+    var queueID = parseInt(req.body.queueID);
+    var queue = await Queue.findOne({queueId: queueID});
+  
+    if (!queue) {
+      return res.status(404).send({
+        message: "Invalid Queue ID!"
+      });
+    }
+  
+    var track = Track({
+        id: req.body.track.id,
+        title: req.body.track.title,
+        artist: req.body.track.artist
+    });
+  
+    var trackExists = false;
+  
+    queue.tracks.some(item => {
+      if (item.id === track.id) {
+        trackExists = true;
+        return true;
+      }
+    });
+  
+    if (trackExists) {
+        await Queue.findOneAndUpdate( 
+            {
+                queueId: queueID,
+                "tracks.id": track.id 
+            },{
+                $inc: {
+                    "tracks.$.votes": 1
+                }
+            });
+
+        return res.send();
+    }
+  
+    // TODO: Verify Track has needed Information
+    queue.tracks.push(track);
+    await queue.save();
+    res.send();
+  });
+
+router.get("/getTracks", async (req, res) => {
   var queueID = parseInt(req.query.queueID);
 
-  var queue = await queueDB.queueExists(queueID);
+  var queue = await Queue.findOne({queueId : queueID});
 
   if (!queue) {
     res.status(404).send({
@@ -145,36 +149,88 @@ router.get("/getTracks", tokenChecker, async (req, res) => {
     total: tracks.length
   });
 });
+  
+router.post("/voteTrack", async (req, res) => {
+    var queueID = parseInt(req.query.queueID);
+    var trackID = req.query.trackID;
 
-router.put("/voteTrack", tokenChecker, async (req, res) => {
-  var queueID = parseInt(req.query.queueID);
-  var trackID = req.query.trackID;
+    var queue = await Queue.findOne({queueId: queueID});
+  
+    if (!queue) {
+      return res.status(404).send({
+        message: "Invalid Queue ID!"
+      });
+    }
 
-  await queueDB.voteTrack(queueID, trackID);
+    var trackExists = false;
+  
+    queue.tracks.some(item => {
+      if (item.id === trackID) {
+        trackExists = true;
+        return true;
+      }
+    });
+  
+    if (!trackExists) {
+        return res.status(404).send();
+    }
 
-  res.send();
+    await Queue.findOneAndUpdate( 
+        {
+            queueId: queueID,
+            "tracks.id": trackID 
+        },{
+            $inc: {
+                "tracks.$.votes": 1
+            }
+        });
+
+    return res.send();
 });
 
-router.put("/unvoteTrack", async (req, res) => {
-  var queueID = parseInt(req.query.queueID);
-  var trackID = req.query.trackID;
+router.post("/unvoteTrack", async (req, res) => {
+    var queueID = parseInt(req.query.queueID);
+    var trackID = req.query.trackID;
 
-  await queueDB.unvoteTrack(queueID, trackID);
-
+    var queue = await Queue.findOne({queueId: queueID});
   
-  var track = await queueDB.getTrack(queueID, trackID);
+    if (!queue) {
+      return res.status(404).send({
+        message: "Invalid Queue ID!"
+      });
+    }
 
-  console.log(track);
+    var track;
+  
+    queue.tracks.some(item => {
+      if (item.id === trackID) {
+        track = item;
+        return item;
+      }
+    });
+  
+    if (!track) {
+        return res.status(404).send();
+    }
+    if(track.votes === 1) {
+        queue.tracks = queue.tracks.filter( (item) => {
+            return item.id !== track.id;
+        })
 
-  if (track.votes == 0) {
-    console.log("Remove Track");
-  }
-  res.send();
+        await queue.save();
+        return res.send("Item removed");
+    }
+
+    await Queue.findOneAndUpdate( 
+        {
+            queueId: queueID,
+            "tracks.id": trackID 
+        },{
+            $inc: {
+                "tracks.$.votes": -1
+            }
+        });
+
+    return res.send("Item decremented");
 })
-
-async function loadQueuesCollection() {
-  const client = await DBConnection.connect();
-  return client.db("queue").collection("queues");
-}
-
 module.exports = router;

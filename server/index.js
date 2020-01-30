@@ -1,8 +1,15 @@
-const express = require("express");
-
+const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+const dotenv = require('dotenv').config({path: './server/.env'});
 
-// Middleware
+//Connect to db
+mongoose.connect(process.env.DB_CONNECT,
+  { useNewUrlParser: true, useUnifiedTopology: true },
+  () => console.log("Connected to database"))
+
+
+//Middleware
 app.use(express.json());
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', "http://localhost:8080");
@@ -12,24 +19,13 @@ app.use(function (req, res, next) {
   next();
 });
 
-const posts = require("./routes/api/posts");
-const auth = require("./routes/api/auth");
-const queue = require("./routes/api/queue");
-const jwt = require("./routes/api/jwt");
+//Import Routes, Route Middlewares
+const authRoute = require('./routes/api/auth');
+const queueRoute = require('./routes/api/queue');
 
-app.use("/api/posts", posts);
-app.use("/api/auth", auth);
-app.use("/api/queue", queue);
-app.use("/api/jwt", jwt)
+app.use("/api/auth", authRoute);
+app.use("/api/queue", queueRoute);
 
-// Handle production
-if (process.env.NODE_ENV == "production") {
-  // Static folder
-  app.use(express.static(__dirname + "/public"));
-
-  // Handle SPA
-  app.get(/.*/, (req, res) => res.sendFile(__dirname + "/public/index.html"));
-}
 
 const port = process.env.PORT || 5000;
 
