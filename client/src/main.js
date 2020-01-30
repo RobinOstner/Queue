@@ -23,8 +23,10 @@ const app = new Vue({
   },
   methods: {
     unload: function (event) {
-      if (this.$store.state.queue.id !== "") {
-        api.queue.closeQueue(this.$store.state.queue.id);
+      var queueID = this.$store.state.queue.id;
+
+      if (queueID !== "") {
+        api.queue.closeQueue(queueID);
       }
     }
   }

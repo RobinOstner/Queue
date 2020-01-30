@@ -29,7 +29,11 @@
       ...mapGetters("queue", {
         queueID: "getQueueID"
       }),
-      ...mapActions("auth", ["setAccessToken", "setRefreshToken", "setExpiryTime"])
+      ...mapActions("auth", ["setAccessToken", "setRefreshToken", "setExpiryTime"]),
+      ...mapActions({
+        initPlayer: "player/init",
+        createQueue: "queue/createQueue",
+      })
     },
     mounted() {
       let spotifyPlayerScript = document.createElement("script");
@@ -45,9 +49,11 @@
         this.setAccessToken(access_token);
         this.setRefreshToken(refresh_token);
         this.setExpiryTime(expires_in);
+        
         this.$router.push("/host");
-        this.$store.dispatch("player/init", null, { root: true });
-        this.$store.dispatch("queue/createQueue", null, { root: true });
+
+        this.initPlayer(null, { root: true });
+        this.createQueue(null, { root: true });
       }
     }
   };

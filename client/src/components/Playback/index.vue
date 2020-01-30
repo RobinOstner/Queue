@@ -4,7 +4,7 @@
     <div class="track" v-if="this.currentTrack">
       <h2 class="title">{{ currentTrack.title }}</h2>
       <h3 class="artist">{{ currentTrack.artist }}</h3>
-      <p>{{toMinutes(progress) + " / " + toMinutes(duration)}}</p>
+      <p>{{ toMinutes(progress) + " / " + toMinutes(duration) }}</p>
       <button @click="togglePlayback">{{ currentTrack.isPlaying ? "Pause" : "Play" }}</button>
       <button @click="nextTrack">Skip</button>
     </div>
@@ -14,6 +14,7 @@
 
 <script>
   import api from "@/api";
+  import { mapGetters } from "vuex";
 
   export default {
     name: "playback",
@@ -21,7 +22,7 @@
       return {
         interval: null,
         progress: 0,
-        duration: 1,
+        duration: 0
       };
     },
     created: function() {
@@ -29,15 +30,17 @@
       this.interval = setInterval(this.checkTime, 1000);
     },
     computed: {
+      ...mapGetters({
+        currentPlayback: "player/getPlayback",
+        player: "player/getPlayer",
+      }),
       currentTrack: function() {
-        var currentPlayback = this.$store.getters["player/getPlayback"];
-
-        if (currentPlayback.item) {
+        if (this.currentPlayback.item) {
           var track = {
-            id: currentPlayback.item.id,
-            title: currentPlayback.item.name,
-            artist: currentPlayback.item.artists[0].name,
-            isPlaying: currentPlayback.is_playing
+            id: this.currentPlayback.item.id,
+            title: this.currentPlayback.item.name,
+            artist: this.currentPlayback.item.artists[0].name,
+            isPlaying: this.currentPlayback.is_playing
           };
 
           return track;
@@ -68,10 +71,8 @@
         }
       },
       getTimeToEnd: async function() {
-        var player = this.$store.getters["player/getPlayer"];
-
-        if (player) {
-          var state = await player.getCurrentState();
+        if (this.player) {
+          var state = await this.player.getCurrentState();
 
           if (!state) {
             return 1000000;
@@ -91,19 +92,14 @@
         var result = await api.queue.nextTrack(this.$store);
 
         if (result.data) {
-          console.log("Play Next Track!");
           api.spotify.player.play(["spotify:track:" + result.data.track.id]);
         } else {
           console.log("Probably no tracks in Queue!");
         }
-
-        this.$store.commit("queue/SET_NEXT_TRACK_WILL_PLAY", false);
       },
       togglePlayback: async function() {
-        var player = this.$store.getters["player/getPlayer"];
-
-        if (player) {
-          player.togglePlay();
+        if (this.player) {
+          this.player.togglePlay();
         }
       },
       toMinutes: function(time) {
