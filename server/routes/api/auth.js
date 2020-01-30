@@ -3,6 +3,9 @@ var config = require("../../config");
 var querystring = require("querystring");
 var request = require("request");
 
+const Queue = require('../../model/Queue');
+const jwtTokenGen = require("../../util/token/tokenHandler");
+const jwtTokenCheck = require("../../util/token/tokenChecker");
 const router = require("express").Router();
 
 router.get("/login", (req, res) => {
@@ -75,6 +78,54 @@ router.get("/loginCallback", (req, res) => {
 			}
 		});
 	}
+});
+
+router.post('/refreshTokenHost',jwtTokenCheck.hostRefresh, async (req, res) => {
+	let queueId = parseInt(req.headers['x-queue-id']);
+
+	if (!queueId) {
+		res.status(404).send('Invalid apiRequest')
+	}
+
+	let queue = await Queue.findOne({ queueId : queueId});
+
+	if(!queue) {
+		res.status(404).send('Invalid apiRequest')
+	}
+
+	let refreshToken = jwtTokenGen.createRefreshTokenHost(queue.tokenSalt);
+
+	res.cookie("refreshToken", refreshToken, {httpOnly: true, Secure: true});
+
+    res.status(201).send( {
+        queueId: savedQueue.queueId,
+        tracks: savedQueue.tracks,
+        token: jwtTokenGen.signHostData(queue.tokenSalt, {queueId: savedQueue.queueId})
+    } );
+});
+
+router.post('/refreshTokenClient',jwtTokenCheck.clientRefresh, async (req, res) => {
+	let queueId = parseInt(req.headers['x-queue-id']);
+
+	if (!queueId) {
+		res.status(404).send('Invalid apiRequest')
+	}
+
+	let queue = await Queue.findOne({ queueId : queueId});
+
+	if(!queue) {
+		res.status(404).send('Invalid apiRequest')
+	}
+
+	let refreshToken = jwtTokenGen.createRefreshTokenClient(queue.tokenSalt);
+
+	res.cookie("refreshToken", refreshToken, {httpOnly: true, Secure: true});
+
+    res.status(201).send( {
+        queueId: savedQueue.queueId,
+        tracks: savedQueue.tracks,
+        token: jwtTokenGen.signClientData(queue.tokenSalt, {queueId: savedQueue.queueId})
+    } );
 });
 
 module.exports = router;

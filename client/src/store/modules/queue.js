@@ -32,7 +32,7 @@ const actions = {
       var response = await api.queue.createQueue();
   
       if (response.data) {
-        commit("SET_QUEUE_ID", response.data.id);
+        commit("SET_QUEUE_ID", response.data.queueId);
       }
     } catch (e) {
       console.log(e);

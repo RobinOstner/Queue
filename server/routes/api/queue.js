@@ -30,7 +30,7 @@ router.post('/createQueue', async (req, res) => {
         res.status(201).send( {
             queueId: savedQueue.queueId,
             tracks: savedQueue.tracks,
-            token: jwtTokenGen.signHostData(savedQueue.tokenSalt, {queueId: savedQueue.queueId, tracks: savedQueue.tracks})
+            token: jwtTokenGen.signHostData(savedQueue.tokenSalt, {queueId: savedQueue.queueId})
         } );
     } catch(err) {
         console.log(err);
@@ -50,18 +50,12 @@ router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
 
 //ToDo check if needed
 router.get("/queueAll", async (req, res) => {
-    await Queue.find({})
-    .where(queueId).gt(0)
-    .select('queueId tracks')
-    .exec()
-    .then( (queues) => {
-        res.send(queues);
-    }).catch( (err) => {
-        console.log(err);
-    });
+    await Queue.find({}, (err, queues) => {
+      res.send(queues);
+    }, {});
 });
 
-router.post("/addTrack", async (req, res) => {
+router.post("/addTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
     var queueID = parseInt(req.body.queueID);
     var queue = await Queue.findOne({queueId: queueID});
   
@@ -97,16 +91,16 @@ router.post("/addTrack", async (req, res) => {
                 }
             });
 
-        return res.send();
+        return res.send("Voted up");
     }
   
     // TODO: Verify Track has needed Information
     queue.tracks.push(track);
-    await queue.save();
-    res.send();
+    let newQueue = await queue.save();
+    res.send(newQueue);
   });
 
-router.get("/getTracks", async (req, res) => {
+router.get("/getTracks", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
   var queueID = parseInt(req.query.queueID);
 
   var queue = await Queue.findOne({queueId : queueID});
@@ -150,7 +144,7 @@ router.get("/getTracks", async (req, res) => {
   });
 });
   
-router.post("/voteTrack", async (req, res) => {
+router.post("/voteTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
     var queueID = parseInt(req.query.queueID);
     var trackID = req.query.trackID;
 
@@ -188,7 +182,7 @@ router.post("/voteTrack", async (req, res) => {
     return res.send();
 });
 
-router.post("/unvoteTrack", async (req, res) => {
+router.post("/unvoteTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
     var queueID = parseInt(req.query.queueID);
     var trackID = req.query.trackID;
 

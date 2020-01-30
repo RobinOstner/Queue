@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config({path: './server/.env'});
+const cookieParser = require('cookie-parser');
 
 //Connect to db
 mongoose.connect(process.env.DB_CONNECT,
@@ -11,6 +12,8 @@ mongoose.connect(process.env.DB_CONNECT,
 
 //Middleware
 app.use(express.json());
+app.use(cookieParser());
+
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', "http://localhost:8080");
   res.header("Access-Control-Allow-Credentials", "true");
