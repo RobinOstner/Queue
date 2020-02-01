@@ -1,6 +1,6 @@
-#QUEUE - A Collective Listening Queue For Spotify
+# QUEUE - A Collective Listening Queue For Spotify
 
-CREATED BY: Robin Ostner
+CREATED BY: Robin Ostner, Florian Sprang
 
 PACKAGES/FRAMEWORKS:
 Vue

@@ -1,4 +1,5 @@
 import api from "@/api";
+import Vue from 'vue'
 
 const state = {
   accessToken: "",
@@ -30,6 +31,7 @@ const actions = {
   loginHost: async function () {
     try {
       const response = await api.auth.getUserAuthURL();
+      console.log(response);
       if (response.data) {
         window.location.assign(response.data);
       }

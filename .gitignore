@@ -1,1 +1,14 @@
+.DS_Store
+
 node_modules
+
+server/config/credentials.js
+
+startup.sh
+
+.idea
+
+*.key
+*.key.pub
+*.pem
+*.env

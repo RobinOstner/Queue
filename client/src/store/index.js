@@ -5,6 +5,7 @@ import auth from './modules/auth';
 import player from './modules/player';
 import guest from './modules/guest';
 import queue from './modules/queue';
+import accessTokens from './modules/accessTokens'
 
 import spotifyApiPlugin from '@/api/spotify/plugin';
 
@@ -16,6 +17,7 @@ export default new Vuex.Store({
     player,
     guest,
     queue,
+    accessTokens,
   },
   plugins: [spotifyApiPlugin]
 })
