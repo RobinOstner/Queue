@@ -11,3 +11,4 @@ startup.sh
 *.key
 *.key.pub
 *.pem
+*.env

@@ -19,7 +19,7 @@ router.post("/createQueue", async (req, res) => {
   var foundUniqueKey = false;
   while (!foundUniqueKey) {
     var queueID = util.generateNewQueueID();
-    foundUniqueKey = ! await queueDB.queueExists(queueID);
+    foundUniqueKey = true; //! await queueDB.queueExists(queueID);
   }
 
   let queueTokenSalt = util.generateRandomString(16);
@@ -83,6 +83,7 @@ router.post("/addTrack", tokenChecker, async (req, res) => {
   }
 
   var track = req.body.track;
+  console.log(track)
   track.votes = 1;
 
   var trackExists = false;
