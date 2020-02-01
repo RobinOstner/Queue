@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const dotenv = require('dotenv').config({path: './server/.env'});
+const dotenv = require('dotenv').config();
 const cookieParser = require('cookie-parser');
 
 //Connect to db
