@@ -33,9 +33,13 @@ const mutations = {
 }
 
 const actions = {
-  createQueue: async function ({ commit }) {
+  createQueue: async function ({ commit, rootGetters }) {
     try {
-      var response = await api.queue.createQueue();
+      var accessToken = rootGetters["auth/getAccessToken"];
+
+      console.log(accessToken);
+
+      var response = await api.queue.createQueue(accessToken);
   
       if (response.data) {
         commit("SET_QUEUE_ID", response.data.id);
