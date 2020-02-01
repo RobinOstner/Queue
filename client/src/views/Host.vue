@@ -2,6 +2,7 @@
   <div class="container">
     <h1 class="title">HOST</h1>
     <h2 class="id">{{ queueID() }}</h2>
+    <playback />
     <div class="layout">
       <search class="column"/>
       <queue class="column"/>
@@ -15,18 +16,24 @@
 
   import Search from "@/components/Search";
   import Queue from "@/components/Queue";
+  import Playback from "@/components/Playback";
 
   export default {
     name: "Host",
     components: {
       Search,
-      Queue
+      Queue,
+      Playback
     },
     methods: {
       ...mapGetters("queue", {
         queueID: "getQueueID"
       }),
-      ...mapActions("auth", ["setAccessToken", "setRefreshToken", "setExpiryTime"])
+      ...mapActions("auth", ["setAccessToken", "setRefreshToken", "setExpiryTime"]),
+      ...mapActions({
+        initPlayer: "player/init",
+        createQueue: "queue/createQueue",
+      })
     },
     mounted() {
       let spotifyPlayerScript = document.createElement("script");
@@ -42,9 +49,11 @@
         this.setAccessToken(access_token);
         this.setRefreshToken(refresh_token);
         this.setExpiryTime(expires_in);
+        
         this.$router.push("/host");
-        this.$store.dispatch("player/init", null, { root: true });
-        this.$store.dispatch("queue/createQueue", null, { root: true });
+
+        this.initPlayer(null, { root: true });
+        this.createQueue(null, { root: true });
       }
     }
   };

@@ -2,7 +2,7 @@
   <div class="preview">
     <h2 class="title">{{ title }}</h2>
     <h3 class="artist">{{ artist }}</h3>
-    <button @click="add">Add To Queue</button>
+    <button @click="add">{{ this.voted ? "Unvote" : "Add To Queue" }}</button>
     <button @click="play">Play</button>
   </div>
 </template>
@@ -10,28 +10,36 @@
 <script>
   import Vue from "vue";
   import api from "@/api";
+  import { mapGetters, mapMutations } from "vuex";
 
   export default Vue.component("preview", {
     props: ["id", "title", "artist"],
     computed: {
+      ...mapGetters({
+        votedTracks: "queue/getVotedTracks"
+      }),
       voted: function() {
-        var votedTracks = this.$store.getters["queue/getVotedTracks"];
-        return votedTracks.includes(this.id);
+        return this.votedTracks.includes(this.id);
       }
     },
     methods: {
+      ...mapMutations({
+        addVotedTrack: "queue/ADD_VOTED_TRACK",
+        removeVotedTrack: "queue/REMOVE_VOTED_TRACK"
+      }),
       add: async function() {
         if (this.voted) {
           api.queue.unvoteTrack(this.$store, this.id);
-          this.$store.commit("queue/REMOVE_VOTED_TRACK", this.id);
+          this.removeVotedTrack(this.id);
         } else {
-          this.$store.commit("queue/ADD_VOTED_TRACK", this.id);
 
           var result = await api.queue.addTrack(this.$store, {
             id: this.id,
             title: this.title,
             artist: this.artist
           });
+          
+          this.addVotedTrack(this.id);
         }
       },
       play: function() {

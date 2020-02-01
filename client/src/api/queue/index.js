@@ -5,31 +5,41 @@ let endpoint = "queue";
 
 export default {
   //ToDo adapt origin
-  createQueue: async function () {
-    return request.post(endpoint + "/createQueue", {}, {
-      withCredentials: true,
-      origin: 'http://localhost:8080'
-    });
+  createQueue: async function(accessToken) {
+    return request.post(
+      endpoint + "/createQueue",
+      {
+        accessToken
+      },
+      {
+        withCredentials: true,
+        origin: "http://localhost:8080"
+      }
+    );
   },
 
-  closeQueue: async function (queueID) {
-    return request.delete(endpoint + "/closeQueue?" + querystring.stringify({
-      id: queueID,
-    }));
+  closeQueue: async function(queueID) {
+    return request.delete(
+      endpoint +
+        "/closeQueue?" +
+        querystring.stringify({
+          id: queueID
+        })
+    );
   },
 
-  addTrack: async function (store, track) {
+  addTrack: async function(store, track) {
     return request({
       url: endpoint + "/addTrack",
       method: "post",
       data: {
         queueID: store.getters["queue/getQueueID"],
         track
-      },
-    })
+      }
+    });
   },
 
-  getTracks: async function (store, offset, limit) {
+  getTracks: async function(store, offset, limit) {
     return request({
       url: endpoint + "/getTracks",
       method: "get",
@@ -38,10 +48,20 @@ export default {
         offset,
         limit
       }
-    })
+    });
   },
 
-  voteTrack: async function (store, trackID) {
+  nextTrack: async function(store) {
+    return request({
+      url: endpoint + "/nextTrack",
+      method: "get",
+      params: {
+        queueID: store.getters["queue/getQueueID"]
+      }
+    });
+  },
+
+  voteTrack: async function(store, trackID) {
     return request({
       url: endpoint + "/voteTrack",
       method: "put",
@@ -49,17 +69,41 @@ export default {
         queueID: store.getters["queue/getQueueID"],
         trackID
       }
-    })
+    });
   },
 
-  unvoteTrack: async function (store, trackID) {
+  unvoteTrack: async function(store, trackID) {
     return request({
-      url: "/unvoteTrack",
+      url: endpoint + "/unvoteTrack",
       method: "put",
       params: {
         queueID: store.getters["queue/getQueueID"],
         trackID
       }
+    });
+  },
+
+  joinQueue: async function(queueID) {
+    return request({
+      url: endpoint + "/joinQueue",
+      method: "post",
+      data: {
+        queueID: queueID
+      }
+    });
+  },
+
+  setCurrentTrack: async function (track) {
+    return request({
+      url: endpoint + "/currentTrack",
+      method: "post",
+      data: {
+        track
+      }
     })
+  },
+
+  getCurrentTrack: async function () {
+    return request.get(endpoint + "/currentTrack");
   }
-}
+};

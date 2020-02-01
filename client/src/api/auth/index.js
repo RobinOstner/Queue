@@ -7,5 +7,5 @@ export default {
 
   refreshToken: function (refreshToken) {
     
-  }
+  },
 };

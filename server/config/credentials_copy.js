@@ -5,12 +5,28 @@ var credentials = {
         database: {
             url: ''
         },
+        jwt: {
+			"hostAccessTokenSecret": "",
+			"hostRefreshTokenSecret": "",
+			"clientAccessTokenSecret": "",
+			"clientRefreshTokenSecret": "",
+			"tokenLife": 3600,
+			"refreshTokenLife": 86400
+		}
     },
     production: {
         //mongodb connection settings
         database: {
             url: ''
         },
+        jwt: {
+			"hostAccessTokenSecret": "",
+			"hostRefreshTokenSecret": "",
+			"clientAccessTokenSecret": "",
+			"clientRefreshTokenSecret": "",
+			"tokenLife": 3600,
+			"refreshTokenLife": 86400
+		}
     }
 };
 

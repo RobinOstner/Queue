@@ -4,12 +4,14 @@ const state = {
   id: "",
   refreshTime: 2500,
   votedTracks: [],
+  nextTrackWillPlay: false,
 }
 
 const getters = {
   getQueueID: state => state.id,
   getRefreshTime: state => state.refreshTime,
   getVotedTracks: state => state.votedTracks,
+  getNextTrackWillPlay: state => state.nextTrackIsAboutToPlay,
 }
 
 const mutations = {
@@ -23,13 +25,21 @@ const mutations = {
 
   REMOVE_VOTED_TRACK(state, trackID) {
     state.votedTracks.splice(state.votedTracks.indexOf(trackID), 1);
+  },
+
+  SET_NEXT_TRACK_WILL_PLAY(state, value) {
+    state.nextTrackIsAboutToPlay = value;
   }
 }
 
 const actions = {
-  createQueue: async function ({ commit }) {
+  createQueue: async function ({ commit, rootGetters }) {
     try {
-      var response = await api.queue.createQueue();
+      var accessToken = rootGetters["auth/getAccessToken"];
+
+      console.log(accessToken);
+
+      var response = await api.queue.createQueue(accessToken);
   
       if (response.data) {
         commit("SET_QUEUE_ID", response.data.id);
