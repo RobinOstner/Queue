@@ -91,5 +91,19 @@ export default {
         queueID: queueID
       }
     });
+  },
+
+  setCurrentTrack: async function (track) {
+    return request({
+      url: endpoint + "/currentTrack",
+      method: "post",
+      data: {
+        track
+      }
+    })
+  },
+
+  getCurrentTrack: async function () {
+    return request.get(endpoint + "/currentTrack");
   }
 };

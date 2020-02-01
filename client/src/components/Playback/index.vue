@@ -7,6 +7,7 @@
       <p>{{ toMinutes(progress) + " / " + toMinutes(duration) }}</p>
       <button @click="togglePlayback">{{ currentTrack.isPlaying ? "Pause" : "Play" }}</button>
       <button @click="nextTrack">Skip</button>
+      <button @click="setCurrentTrack">Set Current Track</button>
     </div>
     <p v-else>Nothing is currently playing!</p>
   </div>
@@ -42,6 +43,8 @@
             artist: this.currentPlayback.item.artists[0].name,
             isPlaying: this.currentPlayback.is_playing
           };
+
+          api.queue.setCurrentTrack(track);
 
           return track;
         } else {
@@ -106,6 +109,9 @@
         var minutes = Math.floor(time / 60);
         var seconds = Math.floor(time % 60);
         return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+      },
+      setCurrentTrack: async function() {
+        api.queue.setCurrentTrack(this.currentTrack);
       }
     }
   };

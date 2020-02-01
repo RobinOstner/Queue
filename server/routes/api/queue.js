@@ -28,6 +28,7 @@ router.post("/createQueue", async (req, res) => {
     queueID,
     queueTokenSalt,
     accessToken,
+    currentTrack: null,
     tracks: []
   };
 
@@ -202,6 +203,29 @@ router.put("/unvoteTrack", async (req, res) => {
   
   await queueDB.removeTrackIfNoVotes(queueID, trackID);
   res.send();
+})
+
+router.post("/currentTrack", tokenChecker, async (req, res) => {
+  let track = req.body.track;
+  let queueID = parseInt(req.headers['x-queue-id']);
+
+  await queueDB.setCurrentTrack(queueID, track);
+
+  res.send();
+});
+
+router.get("/currentTrack", tokenChecker, async (req, res) => {
+  let queueID = parseInt(req.headers['x-queue-id']);
+
+  var queue = await queueDB.queueExists(queueID);
+
+  if (!queue) {
+    res.status(404).send({error: "No queue found"});
+  }
+
+  var currentTrack = queue.currentTrack;
+
+  res.send({ track: currentTrack });
 })
 
 async function loadQueuesCollection() {

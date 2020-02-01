@@ -27,7 +27,6 @@
         this.$store.dispatch("auth/loginHost");
       },
       join: async function() {
-        console.log(this.message);
         var queueID = this.message;
 
         api.queue.joinQueue(this.message).then(res => {
