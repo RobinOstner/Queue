@@ -17,7 +17,7 @@ tokenChecker.clientAccess = async (req, res, next) => {
 
 	token = token.slice(7, token.length).trimLeft();
 
-	let salt = (await Queue.findOne({queueId: queueID})).tokenSalt;
+	let salt = (await Queue.findOne({queueID: queueID})).tokenSalt;
 
 	jwt.verify(token, process.env.CLIENT_ACCESS_TOKEN_SECRET + salt, function (err, decoded) {
 		if (err) {
@@ -56,7 +56,7 @@ tokenChecker.clientRefresh = async (req, res, next) => {
 
 	token = token.slice(7, token.length).trimLeft();
 
-	let salt = (await Queue.findOne({queueId: queueID})).tokenSalt;
+	let salt = (await Queue.findOne({queueID: queueID})).tokenSalt;
 
 	var isValiedRequest = false;
 	jwt.verify(token, process.env.CLIENT_ACCESS_TOKEN_SECRET + salt, function (err, decoded) {
@@ -97,7 +97,7 @@ tokenChecker.hostAccess = async (req, res, next) => {
 
 	token = token.slice(7, token.length).trimLeft();
 
-	let salt = (await Queue.findOne({queueId: queueID})).tokenSalt;
+	let salt = (await Queue.findOne({queueID: queueID})).tokenSalt;
 
 	jwt.verify(token, process.env.HOST_ACCESS_TOKEN_SECRET + salt, function (err, decoded) {
 		if (err) {
@@ -143,7 +143,7 @@ tokenChecker.hostRefresh = async (req, res, next) => {
 
 	token = token.slice(7, token.length).trimLeft();
 
-	let salt = (await Queue.findOne({queueId: queueID})).tokenSalt;
+	let salt = (await Queue.findOne({queueID: queueID})).tokenSalt;
 
 	var validRequest = false;
 	jwt.verify(token, process.env.HOST_REFRESH_TOKEN_SECRET + salt, function (err, decoded) {
@@ -190,7 +190,7 @@ tokenChecker.hostAndClientAccess = async (req, res, next) => {
 
 	token = token.slice(7, token.length).trimLeft();
 
-	let salt = (await Queue.findOne({queueId: queueID})).tokenSalt;
+	let salt = (await Queue.findOne({queueID: queueID})).tokenSalt;
 
 	var checkPassed = false;
 	jwt.verify(token, process.env.CLIENT_ACCESS_TOKEN_SECRET + salt, function (err, decoded) {

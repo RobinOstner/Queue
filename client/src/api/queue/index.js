@@ -64,7 +64,7 @@ export default {
   voteTrack: async function(store, trackID) {
     return request({
       url: endpoint + "/voteTrack",
-      method: "put",
+      method: "post",
       params: {
         queueID: store.getters["queue/getQueueID"],
         trackID
@@ -75,7 +75,7 @@ export default {
   unvoteTrack: async function(store, trackID) {
     return request({
       url: endpoint + "/unvoteTrack",
-      method: "put",
+      method: "post",
       params: {
         queueID: store.getters["queue/getQueueID"],
         trackID

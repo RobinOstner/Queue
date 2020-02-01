@@ -7,14 +7,14 @@ export default function apiJwtToken(axios) {
 
 	axios.interceptors.request.use(function(config) {
 		const accessToken = store.getters["accessTokens/token"];
-		const queueId = store.getters["queue/getQueueID"]
+		const queueID = store.getters["queue/getQueueID"]
 
 		if(accessToken) {
 			config.headers.Authorization = `Bearer ${accessToken}`;
 		}
 
-		if(queueId) {
-			config.headers["x-queue-id"] = queueId;
+		if(queueID) {
+			config.headers["x-queue-id"] = queueID;
 		}
 
 		return config;

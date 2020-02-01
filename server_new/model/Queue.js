@@ -2,7 +2,7 @@ const Track = require('./Track');
 const mongoose = require('mongoose');
 
 const queueSchema = new mongoose.Schema({
-    queueId: {
+    queueID: {
         type: Number,
         required: true,
         unique: true,
@@ -17,6 +17,13 @@ const queueSchema = new mongoose.Schema({
     },
     tracks: {
         type: [Track.schema]
+    },
+    currentTrack: {
+        type: Track.schema
+    },
+    accessToken: {
+        type: String,
+        required: true,
     }
 });
 
