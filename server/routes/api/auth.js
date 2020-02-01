@@ -2,6 +2,7 @@ var util = require("../../util/");
 var config = require("../../config");
 var querystring = require("querystring");
 var request = require("request");
+var queueDB = require("../../extern/mongo/queueDB");
 
 const express = require("express");
 const router = express.Router();

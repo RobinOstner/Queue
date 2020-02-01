@@ -14,6 +14,8 @@ const queueDB = require("../../extern/mongo/queueDB");
 const router = express.Router();
 
 router.post("/createQueue", async (req, res) => {
+  var accessToken = req.body.accessToken;
+
   var foundUniqueKey = false;
   while (!foundUniqueKey) {
     var queueID = util.generateNewQueueID();
@@ -25,6 +27,8 @@ router.post("/createQueue", async (req, res) => {
   var queue = {
     queueID,
     queueTokenSalt,
+    accessToken,
+    currentTrack: null,
     tracks: []
   };
 
@@ -40,8 +44,7 @@ router.post("/createQueue", async (req, res) => {
 });
 
 router.post("/joinQueue", async (req, res) => {
-  const queueId = req.body.id;
-
+  const queueId = parseInt(req.body.queueID);
   queueDB.queueExists(queueId).then(queue => {
     if (!queue) {
       res.status(404).send({error: "No queue found"});
@@ -52,6 +55,7 @@ router.post("/joinQueue", async (req, res) => {
     res.cookie("refreshToken", accessTokens.refreshToken, {httpOnly: true, Secure: true});
     res.json({
       token: accessTokens.token,
+      accessToken: queue.accessToken,
     }).send()
   });
 });
@@ -199,6 +203,29 @@ router.put("/unvoteTrack", async (req, res) => {
   
   await queueDB.removeTrackIfNoVotes(queueID, trackID);
   res.send();
+})
+
+router.post("/currentTrack", tokenChecker, async (req, res) => {
+  let track = req.body.track;
+  let queueID = parseInt(req.headers['x-queue-id']);
+
+  await queueDB.setCurrentTrack(queueID, track);
+
+  res.send();
+});
+
+router.get("/currentTrack", tokenChecker, async (req, res) => {
+  let queueID = parseInt(req.headers['x-queue-id']);
+
+  var queue = await queueDB.queueExists(queueID);
+
+  if (!queue) {
+    res.status(404).send({error: "No queue found"});
+  }
+
+  var currentTrack = queue.currentTrack;
+
+  res.send({ track: currentTrack });
 })
 
 async function loadQueuesCollection() {

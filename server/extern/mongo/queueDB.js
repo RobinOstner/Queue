@@ -68,22 +68,35 @@ var queueDB = {
         queueID: queueID
       },
       {
-        $pull: {tracks: {id: {$in: [trackID]}, votes: 0}}
+        $pull: { tracks: { id: { $in: [trackID] }, votes: 0 } }
       }
     );
   },
 
-  removeTrack: async function (queueID, trackID) {
+  removeTrack: async function(queueID, trackID) {
     var db = await loadQueuesCollection();
     return db.updateOne(
       {
         queueID: queueID
       },
       {
-        $pull: {tracks: {id: {$in: [trackID]}}}
+        $pull: { tracks: { id: { $in: [trackID] } } }
       }
     );
-  }
+  },
+
+  setCurrentTrack: async function(queueID, track) {
+    var db = await loadQueuesCollection();
+
+    return await db.updateOne(
+      {
+        queueID: queueID
+      },
+      {
+        $set: { currentTrack: track }
+      }
+    );
+  },
 };
 
 async function loadQueuesCollection() {
