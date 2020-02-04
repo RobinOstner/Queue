@@ -43,6 +43,7 @@ const actions = {
   
       if (response.data) {
         commit("SET_QUEUE_ID", response.data.queueID);
+        commit("auth/SET_IS_HOST", null, {root: true});
       }
     } catch (e) {
       console.log(e);
