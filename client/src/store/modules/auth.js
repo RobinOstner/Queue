@@ -4,13 +4,15 @@ import Vue from 'vue'
 const state = {
   accessToken: "",
   refreshToken: "",
-  expiryTime: ""
+  expiryTime: "",
+  isHost: false
 }
 
 const getters = {
   getAccessToken: (state) => state.accessToken,
   getRefreshToken: (state) => state.refreshToken,
-  getExpiryTime: (state) => state.expiryTime
+  getExpiryTime: (state) => state.expiryTime,
+  getIsHost: (state) => state.isHost 
 }
 
 const mutations = {
@@ -24,6 +26,10 @@ const mutations = {
 
   SET_EXPIRY_TIME(state, time) {
     state.expiryTime = time;
+  },
+
+  SET_IS_HOST(state, isHost) {
+    state.isHost = isHost;
   }
 }
 
@@ -43,6 +49,7 @@ const actions = {
   refreshToken: async function ({ commit, state, dispatch }) {
     try {
       if (state.refreshToken) {
+        //TODO WHY DOUBLE ? 
         const response = await api.refreshToken(state.refreshToken);
         commit("SET_ACCESS_TOKEN", response.data.accessToken);
 
