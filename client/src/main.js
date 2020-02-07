@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import App from './App.vue';
 import axios from 'axios';
+import VueAnime from "vue-animejs";
 
 import router from "@/router";
 import store from "@/store";
@@ -11,6 +12,7 @@ import httpInterceptors from "./api/helper/jwtInterceptors";
 var VueCookie = require('vue-cookie');
 
 Vue.use(VueCookie);
+Vue.use(VueAnime);
 
 Vue.config.productionTip = false;
 
@@ -28,6 +30,6 @@ const app = new Vue({
       if (queueID !== "") {
         api.queue.closeQueue(queueID);
       }
-    }
-  }
+    },
+  },
 }).$mount('#app')
