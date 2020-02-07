@@ -50,7 +50,7 @@
         this.setRefreshToken(refresh_token);
         this.setExpiryTime(expires_in);
         
-        this.$router.push("/host");
+        this.$router.replace("/host");
 
         this.initPlayer(null, { root: true });
         this.createQueue(null, { root: true });
