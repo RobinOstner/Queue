@@ -54,7 +54,7 @@
 
           this.$nextTick(function() {
             this.$refs.guestInput.select();
-          })
+          });
 
           this.$anime({
             targets: ".guest",
@@ -221,6 +221,10 @@
 
     input::placeholder {
       color: white;
+    }
+
+    input::selection {
+      background: white;
     }
   }
 </style>
