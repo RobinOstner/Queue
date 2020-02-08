@@ -28,7 +28,7 @@ const app = new Vue({
       var queueID = this.$store.state.queue.id;
 
       if (queueID !== "") {
-        api.queue.closeQueue(queueID);
+        //api.queue.closeQueue(queueID);
       }
     },
   },

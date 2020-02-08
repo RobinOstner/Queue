@@ -37,8 +37,6 @@ const actions = {
     try {
       var accessToken = rootGetters["auth/getAccessToken"];
 
-      console.log(accessToken);
-
       var response = await api.queue.createQueue(accessToken);
   
       if (response.data) {
