@@ -100,9 +100,6 @@
         flex-direction: row;
         align-items: center;
 
-        .duration {
-        }
-
         .spacer {
           height: 1em;
           width: 2px;
