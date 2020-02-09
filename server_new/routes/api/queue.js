@@ -71,9 +71,9 @@ router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
   var id = parseInt(req.query.id);
   Queue.deleteOne({ queueID: id }, function(err) {
     res.status(204).send(err);
+  }).then( () => {
+    res.status(200).send();
   });
-
-  res.status(200).send();
 });
 
 //ToDo check if needed
