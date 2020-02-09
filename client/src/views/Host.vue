@@ -11,15 +11,6 @@
     <transition name="blur">
       <host-settings class="settings" v-if="this.settingsOpen" ref="settings" />
     </transition>
-    <!---
-    <h1 class="title">HOST</h1>
-    <h2 class="id">{{ queueID() }}</h2>
-    <playback />
-    <div class="layout">
-      <search class="column" />
-      <queue class="column" />
-    </div>
-    --->
   </div>
 </template>
 
@@ -37,9 +28,6 @@
   export default {
     name: "Host",
     components: {
-      // Search,
-      // Queue,
-      // Playback,
       CurrentSong,
       Hamburger,
       HostSettings

@@ -5,7 +5,7 @@
       <div class="columnLeft">
         <div class="inputField">
           <h3>PASSWORD:</h3>
-          <input ref="guestInput" v-model="message" type="text" />
+          <input ref="guestInput" v-model="password" type="text" v-on:keyup.enter="setPassword"/>
         </div>
       </div>
 
@@ -45,13 +45,14 @@
     },
     data: function() {
       return {
-        message: ""
+        password: ""
       };
     },
     computed: {
       ...mapGetters({
         currentPlayback: "player/getPlayback",
-        player: "player/getPlayer"
+        player: "player/getPlayer",
+        queueID: "queue/getQueueID",
       }),
       currentTrack: function() {
         if (this.currentPlayback.item) {
@@ -86,6 +87,11 @@
         if (this.player) {
           this.player.togglePlay();
         }
+      },
+      setPassword: async function() {
+       api.queue.setPassword(this.queueID, this.password).then((res) => {
+         console.log(res);
+       });
       }
     }
   };
