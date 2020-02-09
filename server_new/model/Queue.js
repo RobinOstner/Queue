@@ -34,9 +34,7 @@ const queueSchema = new mongoose.Schema({
 });
 
 queueSchema.methods.checkPassword = function(password) {
-    let hash = crypto.createHash('md5').update( queue.tokenSalt + queue.tokenSalt + password + queue.tokenSalt).digest("hex");
-
-    console.log(this.password === hash);
+    let hash = crypto.createHash('md5').update( this.tokenSalt + this.tokenSalt + password + this.tokenSalt).digest("hex");
     return this.password === hash;
 };
 

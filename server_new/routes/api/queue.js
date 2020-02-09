@@ -93,13 +93,19 @@ router.post("/setQueuePassword", jwtTokenCheck.hostAccess, async (req, res) => {
 router.post("/joinQueue", async (req, res) => {
   const queueID = parseInt(req.body.queueID);
 
+  const password = req.body.password;
+
   Queue.findOne({ queueID: queueID })
     .then(queue => {
       if (!queue) {
         return res.status(404).send({ error: "No queue found" });
       }
 
-      if(queue.hasPassword()){
+      if(queue.hasPassword() && !password){
+        return res.status(401).send({ error: "Unauthorized"});
+      }
+
+      if(queue.hasPassword() && !queue.checkPassword(password)){
         return res.status(401).send({ error: "Unauthorized"});
       }
 
