@@ -93,15 +93,24 @@
       join: async function() {
         var queueID = this.message;
 
-        api.queue.joinQueue(this.message).then(res => {
-          var token = res.data.token;
-          var accessToken = res.data.accessToken;
-
-          if (token && accessToken) {
-            this.setQueueID(queueID);
-            this.setAccessToken(accessToken);
-            this.$router.push({ path: "/guest" });
+        api.queue.hasPassword(this.message).then( res => {
+          if(!res.data.hasPassword) {
+            api.queue.joinQueue(this.message).then(res => {
+              var token = res.data.token;
+              var accessToken = res.data.accessToken;
+              if (token && accessToken) {
+                this.setQueueID(queueID);
+                this.setAccessToken(accessToken);
+                this.$router.push({ path: "/guest" });
+              }
+              }).catch( err => {
+                console.log(err)
+              });
+          } else {
+            //ToDO handle client password input
           }
+        }).catch( err => {
+          console.log(err);
         });
       }
     }

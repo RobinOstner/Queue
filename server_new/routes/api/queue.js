@@ -43,8 +43,7 @@ router.post("/createQueue", async (req, res) => {
 });
 
 router.get("/queueHasPassword", async (req, res) => {
-  console.log(req.body)
-  var queueID = parseInt(req.body.queueID);
+  var queueID = parseInt(req.query.queueID);
 
   if(!queueID) {
     return res.send(400);
