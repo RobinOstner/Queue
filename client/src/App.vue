@@ -12,10 +12,14 @@
 
 <style>
   #app {
-    font-family: "Avenir", Helvetica, Arial, sans-serif;
+    font-family: "Rationale", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: rgba(18, 22, 37, 0.933);
+    color: black;
     height: 100%;
+  }
+
+  ::selection {
+    background: white;
   }
 </style>

@@ -222,10 +222,6 @@
     input::placeholder {
       color: white;
     }
-
-    input::selection {
-      background: white;
-    }
   }
 </style>
 

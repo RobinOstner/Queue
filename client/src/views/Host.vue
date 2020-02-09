@@ -109,7 +109,7 @@
   .header {
     position: relative;
     overflow: hidden;
-    padding: 50px;
+    padding: 50px 50px 0;
     z-index: 1;
 
     .title {
@@ -124,6 +124,7 @@
     .hamburger {
       width: 100px;
       height: 100px;
+      transform: translateY(-10px);
     }
 
     .left {
@@ -161,11 +162,12 @@
 
   .blur-enter-active,
   .blur-leave-active {
-    transition: backdrop-filter .5s, background-color .5s;
+    transition: backdrop-filter .5s, background-color .5s, opacity 1s;
   }
   .blur-enter,
   .blur-leave-to {
     backdrop-filter: none;
     background-color: #3E3E3E00;
+    opacity: 0;
   }
 </style>
