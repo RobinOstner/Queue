@@ -2,7 +2,7 @@
   <div>
     <input type="text" class="searchInput" v-model="inputText" />
     <p class="loadingPlaceholder" v-if="searching">Loading...</p>
-    <preview v-for="result in results" :key="result.id" v-bind:id="result.id" v-bind:title="result.title" v-bind:artist="result.artist"></preview>
+    <preview v-for="result in results" :key="result.id" :id="result.id" :title="result.title" :artist="result.artist" :duration="result.duration" :coverURL="result.coverURL"></preview>
   </div>
 </template>
 
@@ -45,7 +45,9 @@
               this.results.push({
                 id: track.id,
                 title: track.name,
-                artist: track.artists[0].name
+                artist: track.artists[0].name,
+                duration: track.duration_ms,
+                coverURL: track.album.images[1].url,
               });
             });
           }

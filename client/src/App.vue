@@ -5,17 +5,25 @@
 </template>
 
 <script>
-export default {
-  name: 'app',
-}
+  export default {
+    name: "app"
+  };
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: rgba(18, 22, 37, 0.933);
-  height: 100%;
-}
+  #app {
+    font-family: "Rationale", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: black;
+    height: 100%;
+  }
+  
+  h1, h2, h3 {
+    font-weight: normal;
+  }
+
+  ::selection {
+    background: white;
+  }
 </style>
