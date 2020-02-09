@@ -74,7 +74,7 @@
   }
 
   /* Timing */
-  $timing: 0.4s;
+  $timing: 0.5s;
 
   .line.cross {
     transition: $timing stroke-dasharray ease $timing, $timing stroke-dashoffset ease $timing, $timing stroke ease 0s;

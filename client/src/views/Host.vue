@@ -161,7 +161,7 @@
 
   .blur-enter-active,
   .blur-leave-active {
-    transition: backdrop-filter 1s, background-color 1s;
+    transition: backdrop-filter .5s, background-color .5s;
   }
   .blur-enter,
   .blur-leave-to {
