@@ -18,6 +18,25 @@ export default {
     );
   },
 
+  hasPassword: async function(data) {
+    return request.get(endpoint + '/queueHasPassword?' + 
+      querystring.stringify(
+      { 
+        queueID: data
+      })
+    );
+  },
+
+  setPassword: async function(queueID, password) {
+    return request.post(
+      endpoint + "/setQueuePassword",
+      {
+        queueID: queueID,
+        password: password
+      }
+    );
+  },
+
   closeQueue: async function(queueID) {
     return request.delete(
       endpoint +
@@ -83,12 +102,13 @@ export default {
     });
   },
 
-  joinQueue: async function(queueID) {
+  joinQueue: async function(queueID, password) {
     return request({
       url: endpoint + "/joinQueue",
       method: "post",
       data: {
-        queueID: queueID
+        queueID: queueID,
+        password: password
       }
     });
   },

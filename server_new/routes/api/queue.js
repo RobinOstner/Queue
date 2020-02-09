@@ -5,6 +5,7 @@ const Track = require("../../model/Track");
 const util = require("../../util/index");
 const jwtTokenGen = require("../../util/token/tokenHandler");
 const jwtTokenCheck = require("../../util/token/tokenChecker");
+const crypto = require('crypto')
 
 router.post("/createQueue", async (req, res) => {
   var accessToken = req.body.accessToken;
@@ -20,7 +21,8 @@ router.post("/createQueue", async (req, res) => {
   const queue = new Queue({
     queueID: queueID,
     tokenSalt: queueTokenSalt,
-    accessToken
+    accessToken,
+    password: queueTokenSalt
   });
 
   try {
@@ -36,17 +38,74 @@ router.post("/createQueue", async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).send(err);
+    res.status(500).send(err);
   }
+});
+
+router.get("/queueHasPassword", async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+
+  if(!queueID) {
+    return res.send(400);
+  }
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if(!queue) {
+    return res.send(404);
+  }
+
+  return res.status(200).send( {
+    hasPassword : queue.hasPassword()
+  });
+});
+
+router.post("/setQueuePassword", jwtTokenCheck.hostAccess, async (req, res) => {
+  var queueID = parseInt(req.body.queueID);
+  var password = req.body.password;
+
+  if(!queueID || !password) {
+    return res.send(400);
+  }
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if(!queue) {
+    return res.send(404);
+  }
+
+  let hash = crypto.createHash('md5').update( queue.tokenSalt + queue.tokenSalt + password + queue.tokenSalt).digest("hex");
+  queue.password = hash;
+  
+
+  await queue.save(function(err, queue) {
+    if(err){
+      console.log(err);
+      return res.status(500).send();
+    }
+    
+    console.log(queue);
+    return res.status(200).send();
+  });
 });
 
 router.post("/joinQueue", async (req, res) => {
   const queueID = parseInt(req.body.queueID);
 
+  const password = req.body.password;
+
   Queue.findOne({ queueID: queueID })
     .then(queue => {
       if (!queue) {
-        res.status(404).send({ error: "No queue found" });
+        return res.status(404).send({ error: "No queue found" });
+      }
+
+      if(queue.hasPassword() && !password){
+        return res.status(401).send({ error: "Unauthorized"});
+      }
+
+      if(queue.hasPassword() && !queue.checkPassword(password)){
+        return res.status(401).send({ error: "Unauthorized"});
       }
 
       let jwtAccessToken = jwtTokenGen.signClientData(queue.tokenSalt, { queueID: queue.queueID });
@@ -71,9 +130,9 @@ router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
   var id = parseInt(req.query.id);
   Queue.deleteOne({ queueID: id }, function(err) {
     res.status(204).send(err);
+  }).then( () => {
+    res.status(200).send();
   });
-
-  res.status(200).send();
 });
 
 //ToDo check if needed
