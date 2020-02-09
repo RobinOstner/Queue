@@ -1,7 +1,7 @@
 <template>
   <div class="container blur">
     <div class="headerSpacer" />
-    <div class="settings row">
+    <div class="settings">
       <div class="columnLeft">
         <div class="inputField">
           <h3>PASSWORD:</h3>
@@ -11,18 +11,22 @@
 
       <div class="columnRight">
         <div class="queueHeader">
-          <h2 class="queueTitle">QUEUE</h2>
+          <div class="header">
+            <h2 class="queueTitle">QUEUE</h2>
 
-          <div class="button" @click="togglePlayback">
-            <h3>{{ currentTrack.isPlaying ? "PAUSE" : "PLAY" }}</h3>
+            <div class="button" @click="togglePlayback">
+              <h3>{{ currentTrack.isPlaying ? "PAUSE" : "PLAY" }}</h3>
+            </div>
+
+            <div class="button" @click="nextTrack">
+              <h3>SKIP</h3>
+            </div>
           </div>
 
-          <div class="button" @click="nextTrack">
-            <h3>SKIP</h3>
-          </div>
+          <div class="seperator" />
         </div>
 
-        <div class="seperator" />
+        <host-queue/>
       </div>
     </div>
   </div>
@@ -32,8 +36,13 @@
   import api from "@/api";
   import { mapGetters } from "vuex";
 
+  import HostQueue from "@/components/Host/Queue";
+
   export default {
     name: "host-settings",
+    components: {
+      HostQueue
+    },
     data: function() {
       return {
         message: ""
@@ -82,11 +91,6 @@
 </script>
 
 <style lang="scss" scoped>
-  .headerSpacer {
-    height: 10.75em;
-    width: 100%;
-  }
-
   .container {
     display: flex;
     flex-direction: column;
@@ -95,55 +99,71 @@
     background-color: #3e3e3e16;
     color: white;
 
+    .headerSpacer {
+      width: 100%;
+      height: 10.75em;
+      min-height: 10.75em;
+      width: 100%;
+      flex: 0;
+    }
+
     .settings {
-      padding: 0 50px 50px;
-      flex-grow: 1;
+      padding: 0 50px;
       display: flex;
+      flex-grow: 1;
+      height: 50%;
 
       .columnLeft {
         flex: 50%;
       }
 
       .columnRight {
+        display: flex;
+        flex-direction: column;
         flex: 50%;
+        overflow:hidden;
       }
 
       .queueHeader {
-        display: flex;
-        margin: 0;
-        justify-content: space-between;
+        flex: 0;
 
-        .queueTitle {
-          font-size: 4em;
-          margin: 0;
-          margin-right: 25%;
-          font-weight: normal;
-        }
-
-        .button {
+        .header {
           display: flex;
-          width: 11.25em;
-          justify-content: center;
-          border-style: solid;
-          border-width: 2px;
-          border-color: white;
-          transition: background-color 0.5s;
+          margin: 0;
+          justify-content: space-between;
 
-          h3 {
-            position: relative;
-            margin: auto;
-            transition: color 0.5s;
-            font-size: 2.25em;
+          .queueTitle {
+            font-size: 4em;
+            margin: 0;
+            margin-right: 25%;
             font-weight: normal;
-            text-align: center;
           }
 
-          &:hover {
-            cursor: pointer;
-            background-color: white;
+          .button {
+            display: flex;
+            width: 11.25em;
+            justify-content: center;
+            border-style: solid;
+            border-width: 2px;
+            border-color: white;
+            transition: background-color 0.5s;
 
             h3 {
-              color: black;
+              position: relative;
+              margin: auto;
+              transition: color 0.5s;
+              font-size: 2.25em;
+              font-weight: normal;
+              text-align: center;
+            }
+
+            &:hover {
+              cursor: pointer;
+              background-color: white;
+
+              h3 {
+                color: black;
+              }
             }
           }
         }

@@ -18,6 +18,10 @@
     color: black;
     height: 100%;
   }
+  
+  h1, h2, h3 {
+    font-weight: normal;
+  }
 
   ::selection {
     background: white;
