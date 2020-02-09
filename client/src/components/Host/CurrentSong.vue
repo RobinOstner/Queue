@@ -1,9 +1,15 @@
 <template>
-  <div class="container" v-if="this.currentTrack != null">
-    <h1 class="title">{{ currentTrack.title }}</h1>
-    <div class="divider"></div>
-    <h2 class="artist">{{ currentTrack.artist }}</h2>
-  </div>
+  <transition name="fade" mode="out-in">
+    <div class="container" v-if="this.currentTrack != null">
+      <transition name="fade" mode="out-in">
+        <h1 class="title">{{ currentTrack.title }}</h1>
+      </transition>
+      <div class="divider"></div>
+      <transition name="fade" mode="out-in">
+        <h2 class="artist">{{ currentTrack.artist }}</h2>
+      </transition>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -133,5 +139,14 @@
     height: 2px;
     margin: 0 25%;
     background-color: white;
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.5s;
+  }
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
   }
 </style>

@@ -127,11 +127,13 @@ router.post("/joinQueue", async (req, res) => {
 
 //ToDo check if actual object id is used or queueID
 router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
+  console.log("Delete queue", req.query.id);
   var id = parseInt(req.query.id);
-  Queue.deleteOne({ queueID: id }, function(err) {
-    res.status(204).send(err);
-  }).then( () => {
-    res.status(200).send();
+  Queue.deleteOne({ queueID: id }, function (err) {
+    if (err) {
+      console.log(err);
+      return;
+    }
   });
 });
 
