@@ -6,7 +6,7 @@
         <h2 class="title">{{ title }}</h2>
         <h2 class="artist">{{ artist }}</h2>
         <div class="stats">
-          <h2 class="duration">{{ duration }}</h2>
+          <h2 class="duration">{{ durationReadable }}</h2>
           <div class="spacer" />
           <h2 class="votes">{{ votes }} Votes</h2>
         </div>
@@ -14,12 +14,7 @@
       <div class="button">
         <h3>REMOVE</h3>
       </div>
-      <!--
-    <h2 class="title">{{ title }}</h2>
-    <h3 class="artist">{{ artist }}</h3>
-    <p class="votes">Votes: {{ votes }}</p>
-    <button @click="voteClicked">{{ this.voted ? "Unvote" : "Vote" }}</button>
-    --></div>
+    </div>
     <div class="seperator" v-if="this.spacer" />
   </div>
 </template>
@@ -35,8 +30,11 @@
       ...mapGetters({
         votedTracks: "queue/getVotedTracks"
       }),
-      voted: function() {
-        return this.votedTracks.includes(this.id);
+      durationReadable: function() {
+        var minutes = Math.floor(this.duration/60000);
+        var seconds = Math.floor(this.duration / 1000 % 60);
+
+        return minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
       }
     },
     methods: {
@@ -62,6 +60,7 @@
     display: flex;
     margin: 0;
     margin-left: 2em;
+    margin-right: 2em;
     margin-top: 2em;
     height: 7.5em;
 

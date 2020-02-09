@@ -100,7 +100,9 @@ router.post("/addTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => 
   var track = Track({
     id: req.body.track.id,
     title: req.body.track.title,
-    artist: req.body.track.artist
+    artist: req.body.track.artist,
+    duration: req.body.track.duration,
+    coverURL: req.body.track.coverURL,
   });
 
   var trackExists = false;
@@ -274,7 +276,9 @@ router.post("/currentTrack", jwtTokenCheck.hostAccess, async (req, res) => {
   var track = new Track({
     id: reqTrack.id,
     title: reqTrack.title,
-    artist: reqTrack.artist
+    artist: reqTrack.artist,
+    duration: reqTrack.duration,
+    coverURL: reqTrack.coverURL
   });
 
   var queue = await Queue.findOne({ queueID: queueID });

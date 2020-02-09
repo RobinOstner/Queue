@@ -34,6 +34,8 @@
             id: this.currentPlayback.item.id,
             title: this.currentPlayback.item.name,
             artist: this.currentPlayback.item.artists[0].name,
+            duration: this.currentPlayback.item.duration_ms,
+            coverURL: this.currentPlayback.item.album.images[1].url,
             isPlaying: this.currentPlayback.is_playing
           };
 
