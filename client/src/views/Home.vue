@@ -11,8 +11,33 @@
       <div class="button guest" @click.stop="openQueueInput" ref="guestButton">
         <h2 v-if="!this.queueInputActive">GUEST</h2>
         <h2 v-if="this.queueInputActive">QUEUE:</h2>
-        <input ref="guestInput" v-model="message" v-if="this.queueInputActive" type="text" maxlength="6" v-on:keyup.enter="join"/>
+        <input class="inputField" ref="guestInput" v-model="message" v-if="this.queueInputActive" type="text" maxlength="6" v-on:keyup.enter="join" v-on:keyup="queueInputChange" />
+
+        <transition name="fade" mode="out-in">
+          <div class="joinButton" v-if="this.queueInputActive && this.queueInputComplete && !this.hasPassword" @click="join">
+            <svg class="arrow" viewBox="0 0 120 120">
+              <g>
+                <path class="line" d="M40,20L80,60L40,100" />
+              </g>
+            </svg>
+          </div>
+        </transition>
       </div>
+
+      <transition name="fade" mode="out-in">
+        <div class="password" @click.stop="openQueueInput" ref="passwordButton" v-if="this.hasPassword && this.queueInputActive">
+          <h2>PASSWORD:</h2>
+          <input class="inputField" ref="guestPasswordInput" v-model="password" type="text" v-on:keyup.enter="joinWithPassword" />
+
+          <div class="joinButton" v-if="this.queueInputComplete" @click="joinWithPassword">
+            <svg class="arrow" viewBox="0 0 120 120">
+              <g>
+                <path class="line" d="M40,20L80,60L40,100" />
+              </g>
+            </svg>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -27,9 +52,16 @@
     data: function() {
       return {
         message: "",
+        password: "",
         windowWidth: 0,
-        queueInputActive: false
+        queueInputActive: false,
+        hasPassword: false
       };
+    },
+    computed: {
+      queueInputComplete: function() {
+        return this.message.length == 6;
+      }
     },
     methods: {
       ...mapMutations({
@@ -52,6 +84,24 @@
 
           var offset = rect.x - window.innerWidth / 2 + rect.width / 2;
 
+          if (this.hasPassword) {
+            offset += rect.width / 2 + rect.width / 6;
+
+            this.$nextTick(function() {
+              var passwordButton = this.$refs.passwordButton;
+
+              var rect = passwordButton.getBoundingClientRect();
+
+              var offset = window.innerWidth / 4 - rect.width / 6;
+
+              this.$anime({
+                targets: passwordButton,
+                translateX: -offset,
+                duration: 1000
+              });
+            });
+          }
+
           this.$nextTick(function() {
             this.$refs.guestInput.select();
           });
@@ -59,7 +109,7 @@
           this.$anime({
             targets: ".guest",
             translateX: -offset,
-            duration: 1000,
+            duration: 1000
           });
 
           this.$anime({
@@ -90,28 +140,93 @@
           duration: 100
         });
       },
+      queueInputChange() {
+        if (this.hasPassword) {
+          this.hasPassword = false;
+
+          var rect = this.$refs.guestButton.getBoundingClientRect();
+
+          var offset = window.innerWidth / 4;
+
+          this.$anime({
+            targets: ".guest",
+            translateX: -offset,
+            duration: 1000
+          });
+        }
+      },
       join: async function() {
         var queueID = this.message;
 
-        api.queue.hasPassword(this.message).then( res => {
-          if(!res.data.hasPassword) {
-            api.queue.joinQueue(this.message).then(res => {
-              var token = res.data.token;
-              var accessToken = res.data.accessToken;
-              if (token && accessToken) {
-                this.setQueueID(queueID);
-                this.setAccessToken(accessToken);
-                this.$router.push({ path: "/guest" });
-              }
-              }).catch( err => {
-                console.log(err)
+        api.queue
+          .hasPassword(this.message)
+          .then(res => {
+            if (!res.data.hasPassword) {
+              api.queue
+                .joinQueue(this.message)
+                .then(res => {
+                  var token = res.data.token;
+                  var accessToken = res.data.accessToken;
+                  if (token && accessToken) {
+                    this.setQueueID(queueID);
+                    this.setAccessToken(accessToken);
+                    this.$router.push({ path: "/guest" });
+                  }
+                })
+                .catch(err => {
+                  console.log(err);
+                });
+            } else {
+              this.hasPassword = true;
+
+              var offset = window.innerWidth / 4 + this.$refs.guestButton.getBoundingClientRect().width / 2 + this.$refs.guestButton.getBoundingClientRect().width / 6;
+
+              this.$anime({
+                targets: ".guest",
+                translateX: -offset,
+                duration: 1000
               });
-          } else {
-            //ToDO handle client password input
-          }
-        }).catch( err => {
-          console.log(err);
-        });
+
+              this.$nextTick(function() {
+                this.$refs.guestPasswordInput.select();
+
+                var passwordButton = this.$refs.passwordButton;
+
+                var rect = passwordButton.getBoundingClientRect();
+
+                var offset = window.innerWidth / 4 - rect.width / 6;
+
+                console.log(offset);
+
+                this.$anime({
+                  targets: passwordButton,
+                  translateX: -offset,
+                  duration: 1000
+                });
+              });
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      },
+      joinWithPassword: function() {
+        var queueID = this.message;
+
+        api.queue
+          .joinQueue(this.message, this.password)
+          .then(res => {
+            var token = res.data.token;
+            var accessToken = res.data.accessToken;
+            if (token && accessToken) {
+              this.setQueueID(queueID);
+              this.setAccessToken(accessToken);
+              this.$router.push({ path: "/guest" });
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
       }
     }
   };
@@ -230,6 +345,132 @@
 
     input::placeholder {
       color: white;
+    }
+
+    .inputField {
+      width: 200px;
+    }
+
+    .joinButton {
+      position: absolute;
+      width: 15%;
+      height: 100%;
+      right: 0;
+      border-width: 2px;
+      border-style: solid;
+      border-color: white;
+      transform: translate(115%, -2px);
+      transition: background-color 0.5s;
+
+      .arrow {
+        position: relative;
+        margin: auto;
+        top: 50%;
+        transform: translateY(-50%);
+
+        .line {
+          stroke: white;
+          stroke-width: 12px;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          fill: transparent;
+          transition: stroke 0.5s;
+        }
+      }
+
+      &:hover {
+        cursor: pointer;
+        background-color: white;
+
+        .line {
+          stroke: #333;
+        }
+      }
+    }
+
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: opacity 1s;
+    }
+    .fade-enter,
+    .fade-leave-to {
+      opacity: 0;
+    }
+  }
+
+  .password {
+    position: absolute;
+    width: 400px;
+    height: 111px;
+    display: flex;
+    color: white;
+    border-style: solid;
+    left: 75%;
+
+    h2 {
+      position: absolute;
+      top: 50%;
+      left: 25px;
+      transform: translate(0, -50%);
+      margin: 0;
+      color: white;
+      font-family: "Rationale";
+      font-size: 2.25em;
+      font-weight: normal;
+    }
+
+    input {
+      position: absolute;
+      top: 50%;
+      right: 25px;
+      transform: translate(0, -50%);
+      margin: 0;
+      color: white;
+      background-color: transparent;
+      border: none;
+      outline: none;
+      text-align: right;
+      font-family: "Rationale";
+      font-weight: normal;
+      font-size: 2.25em;
+      transition: color 0.5s;
+    }
+
+    .joinButton {
+      position: absolute;
+      width: 15%;
+      height: 100%;
+      right: 0;
+      border-width: 2px;
+      border-style: solid;
+      border-color: white;
+      transform: translate(115%, -2px);
+      transition: background-color 0.5s;
+
+      .arrow {
+        position: relative;
+        margin: auto;
+        top: 50%;
+        transform: translateY(-50%);
+
+        .line {
+          stroke: white;
+          stroke-width: 12px;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          fill: transparent;
+          transition: stroke 0.5s;
+        }
+      }
+
+      &:hover {
+        cursor: pointer;
+        background-color: white;
+
+        .line {
+          stroke: #333;
+        }
+      }
     }
   }
 </style>
