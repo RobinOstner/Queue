@@ -1,5 +1,11 @@
 <template>
-  <div>
+  <div class="guest">
+    <div class="header">
+      <h1 class="title left">{{ title }}</h1>
+      <h1 class="title right">{{currentTrack.title}} - {{currentTrack.artist}}</h1>
+    </div>
+  </div>
+  <!--div>
     <h1 class="title">GUEST</h1>
     <h2>{{ currentTrack.title }}</h2>
     <h3>{{ currentTrack.artist }}</h3>
@@ -7,7 +13,7 @@
       <search class="column" />
       <queue class="column" />
     </div>
-  </div>
+  </div-->
 </template>
 
 <script>
@@ -15,12 +21,13 @@
   import Queue from "@/components/Queue";
 
   import api from "@/api";
+  import { mapGetters } from "vuex";
 
   export default {
     name: "Guest",
     components: {
-      Search,
-      Queue
+      // Search,
+      // Queue
     },
     data: function() {
       return {
@@ -37,7 +44,15 @@
 
       window.addEventListener("beforeunload", this.clearTimer);
     },
+    computed: {
+      title: function() {
+        return "Queue - " + this.queueID();
+      }
+    },
     methods: {
+      ...mapGetters("queue", {
+        queueID: "getQueueID"
+      }),
       timerCallback: async function() {
         var res = await api.queue.getCurrentTrack();
 
@@ -56,19 +71,48 @@
 </script>
 
 <style lang="scss" scoped>
-  h2 {
-    margin: 0;
+  .guest {
+    background-image: radial-gradient(farthest-side at 65% 35%, #0e1e31, #060c14);
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
   }
 
-  h3 {
-    margin: 0;
+  .header {
+    position: relative;
+    overflow: hidden;
+    padding: 50px 50px 0;
+    z-index: 1;
+
+    .title {
+      margin: 0;
+      color: white;
+      font-family: "Rationale", sans-serif;
+      font-size: 4.5em;
+      font-weight: normal;
+      text-transform: uppercase;
+    }
+
+    .hamburger {
+      width: 100px;
+      height: 100px;
+      transform: translateY(-10px);
+    }
+
+    .left {
+      float: left;
+    }
+
+    .right {
+      float: right;
+    }
   }
 
-  .layout {
-    display: flex;
-  }
-
-  .column {
-    flex: 50%;
+  .center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 </style>
