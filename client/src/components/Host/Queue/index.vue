@@ -98,7 +98,9 @@
 
   .scroll {
     overflow: auto;
-    margin-right: -100px;
-    padding-right: 100px;
+  }
+  
+  .scroll::-webkit-scrollbar {
+    width: 0px;
   }
 </style>

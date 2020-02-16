@@ -27,7 +27,7 @@
       <transition name="fade" mode="out-in">
         <div class="password" @click.stop="openQueueInput" ref="passwordButton" v-if="this.hasPassword && this.queueInputActive">
           <h2>PASSWORD:</h2>
-          <input class="inputField" ref="guestPasswordInput" v-model="password" type="text" v-on:keyup.enter="joinWithPassword" />
+          <input class="inputField" ref="guestPasswordInput" v-model="password" type="password" v-on:keyup.enter="joinWithPassword" />
 
           <div class="joinButton" v-if="this.queueInputComplete" @click="joinWithPassword">
             <svg class="arrow" viewBox="0 0 120 120">
