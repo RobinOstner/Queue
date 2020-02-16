@@ -1,8 +1,7 @@
 <template>
-  <div>
-    <button @click="refresh">Refresh Queue</button>
+  <div class="scroll">
     <transition-group name="tracks">
-      <preview v-for="track in tracks" :key="track.id" :id="track.id" :title="track.title" :artist="track.artist" :votes="track.votes" />
+      <preview v-for="(track, index) in tracks" :key="track.id" :id="track.id" :title="track.title" :artist="track.artist" :votes="track.votes" :duration="track.duration" :coverURL="track.coverURL" :spacer="showSpacer(index)" />
     </transition-group>
   </div>
 </template>
@@ -11,12 +10,12 @@
   import api from "@/api";
 
   import Preview from "./Preview";
-  import { RetryError } from "./../../exception/retryError";
+  import { RetryError } from "@/exception/retryError";
   import { mapGetters } from "vuex";
   import { mapMutations } from "vuex";
 
   export default {
-    name: "queue",
+    name: "host-queue",
     components: {
       Preview
     },
@@ -31,7 +30,7 @@
         refreshTime: "queue/getRefreshTime",
         queueID: "queue/getQueueID",
         votedTracks: "queue/getVotedTracks"
-      })
+      }),
     },
     created() {
       this.refresh();
@@ -41,6 +40,9 @@
       ...mapMutations({
         removeVotedTrack: "queue/REMOVE_VOTED_TRACK"
       }),
+      showSpacer: function(index) {
+        return index != this.tracks.length - 1;
+      },
       refresh: async function() {
         if (!this.queueID) {
           return;
@@ -92,5 +94,13 @@
 <style lang="scss" scoped>
   .tracks-move {
     transition: transform 1s;
+  }
+
+  .scroll {
+    overflow: auto;
+  }
+  
+  .scroll::-webkit-scrollbar {
+    width: 0px;
   }
 </style>
