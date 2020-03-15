@@ -80,6 +80,38 @@ router.get("/loginCallback", (req, res) => {
 	}
 });
 
+router.post('/hostSpotifyRefresh', jwtTokenCheck.hostAccess, async (req, res) => {
+	var authOptions = {
+		url: "https://accounts.spotify.com/api/token",
+		form: {
+			grant_type: "refresh_token",
+			refresh_token: req.body.refreshToken
+		},
+		headers: {
+			Authorization: "Basic " + new Buffer(process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET).toString("base64")
+		},
+		json: true
+	};
+
+	request.post(authOptions, (err, response, body) => {
+		if(!err) {
+			const {access_token, token_type, scope, expires_in} = body;
+
+			res.status(200).send(
+				{
+					access_token,
+					refresh_token,
+					expires_in
+				}
+			);
+		} else {
+			res.redirect("/" + querystring.stringify({
+				error: "invalid_token"
+			}));
+		}
+	});
+});
+
 router.post('/refreshTokenHost',jwtTokenCheck.hostRefresh, async (req, res) => {
 	let queueId = parseInt(req.headers['x-queue-id']);
 
