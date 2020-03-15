@@ -20,7 +20,7 @@ router.post("/createQueue", async (req, res) => {
   const queue = new Queue({
     queueID: queueID,
     tokenSalt: queueTokenSalt,
-    accessToken,
+    accessToken: accessToken,
     password: queueTokenSalt
   });
 
@@ -132,9 +132,7 @@ router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
       console.log(err)
       res.status(204).send(err);
     }
-    console.log("HERE")
   }).then( (result) => {
-    console.log(result);
     res.status(200).send();
   });
 });
