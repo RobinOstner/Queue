@@ -5,16 +5,16 @@
       <h1 class="title right">CONTACT</h1>
     </div>
     <div class="login">
-      <div class="button host" @click="login" ref="hostButton">
+      <div class="button host" @click="loginClicked" ref="hostButton">
         <h2>HOST</h2>
       </div>
       <div class="button guest" @click.stop="openQueueInput" ref="guestButton">
         <h2 v-if="!this.queueInputActive">GUEST</h2>
         <h2 v-if="this.queueInputActive">QUEUE:</h2>
-        <input class="inputField" ref="guestInput" v-model="message" v-if="this.queueInputActive" type="text" maxlength="6" v-on:keyup.enter="join" v-on:keyup="queueInputChange" />
+        <input class="inputField" ref="guestInput" v-model="message" v-if="this.queueInputActive" type="text" maxlength="6" v-on:keyup.enter="joinClicked" v-on:keyup="queueInputChange" />
 
         <transition name="fade" mode="out-in">
-          <div class="joinButton" v-if="this.queueInputActive && this.queueInputComplete && !this.hasPassword" @click="join">
+          <div class="joinButton" v-if="this.queueInputActive && this.queueInputComplete && !this.hasPassword" @click="joinClicked">
             <svg class="arrow" viewBox="0 0 120 120">
               <g>
                 <path class="line" d="M40,20L80,60L40,100" />
@@ -27,9 +27,9 @@
       <transition name="fade" mode="out-in">
         <div class="password" @click.stop="openQueueInput" ref="passwordButton" v-if="this.hasPassword && this.queueInputActive">
           <h2>PASSWORD:</h2>
-          <input class="inputField" ref="guestPasswordInput" v-model="password" type="password" v-on:keyup.enter="joinWithPassword" />
+          <input class="inputField" ref="guestPasswordInput" v-model="password" type="password" v-on:keyup.enter="joinWithPasswordClicked" />
 
-          <div class="joinButton" v-if="this.queueInputComplete" @click="joinWithPassword">
+          <div class="joinButton" v-if="this.queueInputComplete" @click="joinWithPasswordClicked">
             <svg class="arrow" viewBox="0 0 120 120">
               <g>
                 <path class="line" d="M40,20L80,60L40,100" />
@@ -43,10 +43,6 @@
 </template>
 
 <script>
-  import api from "@/api";
-  import vue from "vue";
-  import { mapMutations } from "vuex";
-
   export default {
     name: "Home",
     data: function() {
@@ -64,12 +60,14 @@
       }
     },
     methods: {
-      ...mapMutations({
-        setQueueID: "queue/SET_QUEUE_ID",
-        setAccessToken: "auth/SET_ACCESS_TOKEN"
-      }),
-      login: function() {
-        this.$store.dispatch("auth/loginHost");
+      loginClicked() {
+        this.$emit("login");
+      },
+      joinClicked() {
+        this.$emit("join", this.message);
+      },
+      joinWithPasswordClicked() {
+        this.$emit("joinWithPassword", this.message, this.password);
       },
       openQueueInput() {
         if (!this.queueInputActive) {
@@ -155,79 +153,35 @@
           });
         }
       },
-      join: async function() {
-        var queueID = this.message;
+      queueHasPassword() {
+        this.hasPassword = true;
 
-        api.queue
-          .hasPassword(this.message)
-          .then(res => {
-            if (!res.data.hasPassword) {
-              api.queue
-                .joinQueue(this.message)
-                .then(res => {
-                  var token = res.data.token;
-                  var accessToken = res.data.accessToken;
-                  if (token && accessToken) {
-                    this.setQueueID(queueID);
-                    this.setAccessToken(accessToken);
-                    this.$router.push({ path: "/guest" });
-                  }
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-            } else {
-              this.hasPassword = true;
+        var offset = window.innerWidth / 4 + this.$refs.guestButton.getBoundingClientRect().width / 2 + this.$refs.guestButton.getBoundingClientRect().width / 6;
 
-              var offset = window.innerWidth / 4 + this.$refs.guestButton.getBoundingClientRect().width / 2 + this.$refs.guestButton.getBoundingClientRect().width / 6;
+        this.$anime({
+          targets: ".guest",
+          translateX: -offset,
+          duration: 1000
+        });
 
-              this.$anime({
-                targets: ".guest",
-                translateX: -offset,
-                duration: 1000
-              });
+        this.$nextTick(function() {
+          this.$refs.guestPasswordInput.select();
 
-              this.$nextTick(function() {
-                this.$refs.guestPasswordInput.select();
+          var passwordButton = this.$refs.passwordButton;
+          var rect = passwordButton.getBoundingClientRect();
 
-                var passwordButton = this.$refs.passwordButton;
+          var offset = window.innerWidth / 4 - rect.width / 6;
 
-                var rect = passwordButton.getBoundingClientRect();
-
-                var offset = window.innerWidth / 4 - rect.width / 6;
-
-                console.log(offset);
-
-                this.$anime({
-                  targets: passwordButton,
-                  translateX: -offset,
-                  duration: 1000
-                });
-              });
-            }
-          })
-          .catch(err => {
-            console.log(err);
+          this.$anime({
+            targets: passwordButton,
+            translateX: -offset,
+            duration: 1000
           });
+        });
       },
-      joinWithPassword: function() {
-        var queueID = this.message;
-
-        api.queue
-          .joinQueue(this.message, this.password)
-          .then(res => {
-            var token = res.data.token;
-            var accessToken = res.data.accessToken;
-            if (token && accessToken) {
-              this.setQueueID(queueID);
-              this.setAccessToken(accessToken);
-              this.$router.push({ path: "/guest" });
-            }
-          })
-          .catch(err => {
-            console.log(err);
-          });
-      }
+    },
+    created: function() {
+      this.$parent.$on("hasPassword", this.queueHasPassword);
     }
   };
 </script>
