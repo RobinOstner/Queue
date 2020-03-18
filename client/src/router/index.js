@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
 
-import Home from '@/views/Home/HomeMain';
+import Home from '@/views/Home/Home';
 import Host from '@/views/Host';
 import Guest from '@/views/Guest';
 
