@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <home-desktop v-if="!isMobile()" @login="login" @join="join" @joinWithPassword="joinWithPassword"/>
-    <home-mobile v-else />
+    <home-mobile v-else @join="join" @joinWithPassword="joinWithPassword"/>
   </div>
 </template>
 
