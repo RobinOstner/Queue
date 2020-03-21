@@ -3,7 +3,7 @@ import Router from "vue-router";
 
 import Home from '@/views/Home/Home';
 import Host from '@/views/Host';
-import Guest from '@/views/Guest';
+import Guest from '@/views/Guest/Guest';
 
 Vue.use(Router);
 
