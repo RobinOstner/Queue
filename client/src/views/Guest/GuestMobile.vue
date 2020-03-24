@@ -3,19 +3,32 @@
     <div class="header">
       <h1 class="title left">Queue</h1>
       <h1 class="title right">{{ queueID }}</h1>
-      <div class="trackInfo">
+      <div class="trackInfo" v-if="currentTrack.title && currentTrack.artist">
         <h1 class="trackTitle">{{ currentTrack.title }}</h1>
         <div class="separator"></div>
         <h1 class="trackArtist">{{ currentTrack.artist }}</h1>
       </div>
     </div>
     <div class="content">
-      <mobile-queue />
+      <mobile-queue v-if="searchEmpty"/>
+      <mobile-search v-else :search-input="searchInput"/>
       <div class="searchBar">
-        <div class="searchButton">
-          <div class="container">
+        <div class="searchButton" @click.stop="openSearchBar" v-if="!searchActive">
+          <div class="searchPlaceholder">
             <img src="/Icons/SearchIcon.png" alt="Search Icon" class="icon" />
-            <h2 class="search">Search</h2>
+            <h2 class="search">SEARCH</h2>
+          </div>
+        </div>
+        <div class="searchContainer" v-else>
+          <div class="searchInputContainer">
+            <div class="searchInput">
+              <img src="/Icons/SearchIcon.png" alt="Search Icon" class="icon" />
+              <input class="inputField" ref="searchInput" v-model="searchInput" type="text"/>
+            </div>
+          </div>
+
+          <div class="returnButton" @click="closeSearchBar">
+            <h2>QUEUE</h2>
           </div>
         </div>
       </div>
@@ -25,15 +38,41 @@
 
 <script>
   import MobileQueue from "@/components/Queue/Mobile";
+  import MobileSearch from "@/components/Search/Guest/Mobile/Mobile"
 
   export default {
     name: "Guest",
     components: {
-      MobileQueue
+      MobileQueue,
+      MobileSearch
+    },
+    computed: {
+      searchEmpty: function() {
+        return this.searchInput == "";
+      }
+    },
+    data: function() {
+      return {
+        searchActive: false,
+        searchInput: ""
+      };
     },
     props: {
-      queueID: Number,
+      queueID: String,
       currentTrack: Object
+    },
+    methods: {
+      openSearchBar: function() {
+        this.searchActive = true;
+
+        this.$nextTick(() => {
+          this.$refs.searchInput.select();
+        })
+      },
+      closeSearchBar: function() {
+        this.searchActive = false;
+        this.searchInput = "";
+      }
     }
   };
 </script>
@@ -122,6 +161,10 @@
       width: 100%;
     }
 
+    mobile-search {
+      width: 100%;
+    }
+
     .searchBar {
       position: absolute;
       bottom: 0;
@@ -136,16 +179,16 @@
         left: 0;
         right: 0;
         margin: auto;
-        width: 80%;
+        width: 90%;
         height: 2.5em;
         border-style: solid;
         border-width: 1px;
         border-color: white;
         text-align: center;
         display: flex;
-        flex-grow: 0;
+        pointer-events: all;
 
-        .container {
+        .searchPlaceholder {
           width: 100%;
           display: flex;
           flex-direction: row;
@@ -153,9 +196,86 @@
           justify-content: center;
 
           .icon {
-            height: 35%;
+            height: 40%;
             width: auto;
           }
+
+          h2 {
+            margin: 5px;
+            font-weight: normal;
+            font-size: 1em;
+          }
+        }
+      }
+
+      .searchContainer {
+        position: absolute;
+        bottom: 10%;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 90%;
+        height: 2.5em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .searchInputContainer {
+          position: relative;
+          border-style: solid;
+          border-width: 1px;
+          border-color: white;
+          text-align: center;
+          display: flex;
+          pointer-events: all;
+          height: 2.5em;
+          width: 70%;
+
+          .searchInput {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: left;
+            overflow: hidden;
+
+            .icon {
+              height: 40%;
+              width: auto;
+              margin: 10px;
+            }
+
+            .inputField {
+              flex-grow: 0;
+              height: 80%;
+              width: 90%;
+              color: white;
+              background-color: transparent;
+              border: none;
+              outline: none;
+              text-align: left;
+              font-family: "Rationale";
+              font-weight: normal;
+              font-size: 1em;
+            }
+          }
+        }
+
+        .returnButton {
+          border-style: solid;
+          border-width: 1px;
+          border-color: white;
+          background-color: white;
+          color: black;
+          text-align: center;
+          display: flex;
+          pointer-events: all;
+          height: 2.5em;
+          width: 25%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: all;
 
           h2 {
             margin: 5px;

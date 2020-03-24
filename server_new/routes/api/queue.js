@@ -52,7 +52,7 @@ router.get("/queueHasPassword", async (req, res) => {
   var queue = await Queue.findOne({ queueID: queueID });
 
   if(!queue) {
-    return res.send(404);
+    return res.sendStatus(404);
   }
 
   return res.status(200).send( {

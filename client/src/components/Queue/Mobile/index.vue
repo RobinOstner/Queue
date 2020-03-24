@@ -41,6 +41,7 @@
     },
     methods: {
       ...mapMutations({
+        setTracks: "queue/SET_TRACKS",
         removeVotedTrack: "queue/REMOVE_VOTED_TRACK"
       }),
       showSpacer: function(index) {
@@ -55,6 +56,7 @@
           .getTracks(this.$store, 0, 20)
           .then(res => {
             if (res.data.tracks) {
+              this.setTracks(res.data.tracks);
               this.tracks = res.data.tracks;
               this.cleanVotedTracks();
             }
