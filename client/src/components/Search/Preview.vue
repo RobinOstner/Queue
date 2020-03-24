@@ -13,7 +13,7 @@
   import { mapGetters, mapMutations } from "vuex";
 
   export default Vue.component("preview", {
-    props: ["id", "title", "artist"],
+    props: ["id", "title", "artist", "duration", "coverURL"],
     computed: {
       ...mapGetters({
         votedTracks: "queue/getVotedTracks"
@@ -36,7 +36,9 @@
           var result = await api.queue.addTrack(this.$store, {
             id: this.id,
             title: this.title,
-            artist: this.artist
+            artist: this.artist,
+            duration: this.duration,
+            coverURL: this.coverURL,
           });
           
           this.addVotedTrack(this.id);

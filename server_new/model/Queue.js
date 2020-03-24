@@ -1,5 +1,7 @@
 const Track = require('./Track');
 const mongoose = require('mongoose');
+const crypto = require('crypto')
+
 
 const queueSchema = new mongoose.Schema({
     queueID: {
@@ -24,7 +26,20 @@ const queueSchema = new mongoose.Schema({
     accessToken: {
         type: String,
         required: true,
+    },
+    password: {
+        type: String,
+        required: true
     }
 });
+
+queueSchema.methods.checkPassword = function(password) {
+    let hash = crypto.createHash('md5').update( this.tokenSalt + this.tokenSalt + password + this.tokenSalt).digest("hex");
+    return this.password === hash;
+};
+
+queueSchema.methods.hasPassword = function(queueID) {
+    return this.tokenSalt !== this.password;
+};
 
 module.exports = mongoose.model('Queue', queueSchema);

@@ -37,12 +37,11 @@ const actions = {
     try {
       var accessToken = rootGetters["auth/getAccessToken"];
 
-      console.log(accessToken);
-
       var response = await api.queue.createQueue(accessToken);
   
       if (response.data) {
         commit("SET_QUEUE_ID", response.data.queueID);
+        commit("auth/SET_IS_HOST", null, {root: true});
       }
     } catch (e) {
       console.log(e);

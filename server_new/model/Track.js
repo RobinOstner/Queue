@@ -13,6 +13,14 @@ const trackSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    duration: {
+        type: Number,
+        required: true,
+    },
+    coverURL: {
+        type: String,
+        required: true,
+    },
     votes: {
         type: Number,
         required: true,
