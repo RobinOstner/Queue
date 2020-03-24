@@ -5,7 +5,10 @@ export default {
     return request.get("auth/login");
   },
 
-  refreshToken: function (refreshToken) {
-    
+  refreshToken: function refreshToken(refreshToken, queueID) {
+    return request.post("auth/hostSpotifyRefresh", {
+      refreshToken: refreshToken,
+      queueID: queueID
+    })
   },
 };

@@ -81,11 +81,28 @@ router.get("/loginCallback", (req, res) => {
 });
 
 router.post('/hostSpotifyRefresh', jwtTokenCheck.hostAccess, async (req, res) => {
+	let queueID = parseInt(req.body.queueID);
+	let refreshToken = req.body.refreshToken;
+
+	if(!queueID) {
+		return res.status(404).send('Invalid apiRequest: No queueId');
+	}
+
+	if(!refreshToken) {
+		return res.status(404).send('Invalid apiRequest: No Token');
+	}
+
+	var queue = await Queue.findOne({ queueID: queueID });
+
+	if(!queue) {
+		return res.status(404).send('Invalid apiRequest: Queue not found')
+	}
+
 	var authOptions = {
 		url: "https://accounts.spotify.com/api/token",
 		form: {
 			grant_type: "refresh_token",
-			refresh_token: req.body.refreshToken
+			refresh_token: refreshToken
 		},
 		headers: {
 			Authorization: "Basic " + new Buffer(process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET).toString("base64")
@@ -97,10 +114,11 @@ router.post('/hostSpotifyRefresh', jwtTokenCheck.hostAccess, async (req, res) =>
 		if(!err) {
 			const {access_token, token_type, scope, expires_in} = body;
 
+			queue.accessToken = access_token;
+			queue.save();
 			res.status(200).send(
 				{
 					access_token,
-					refresh_token,
 					expires_in
 				}
 			);
@@ -116,13 +134,13 @@ router.post('/refreshTokenHost',jwtTokenCheck.hostRefresh, async (req, res) => {
 	let queueId = parseInt(req.headers['x-queue-id']);
 
 	if (!queueId) {
-		res.status(404).send('Invalid apiRequest')
+		return res.status(404).send('Invalid apiRequest')
 	}
 
-	let queue = await Queue.findOne({ queueId : queueId});
+	let queue = await Queue.findOne({ queueID : queueId});
 
 	if(!queue) {
-		res.status(404).send('Invalid apiRequest')
+		return res.status(404).send('Invalid apiRequest')
 	}
 
 	let refreshToken = jwtTokenGen.createRefreshTokenHost(queue.tokenSalt);
@@ -140,13 +158,13 @@ router.post('/refreshTokenClient',jwtTokenCheck.clientRefresh, async (req, res) 
 	let queueId = parseInt(req.headers['x-queue-id']);
 
 	if (!queueId) {
-		res.status(404).send('Invalid apiRequest')
+		return res.status(404).send('Invalid apiRequest')
 	}
 
-	let queue = await Queue.findOne({ queueId : queueId});
+	let queue = await Queue.findOne({ queueID : queueId});
 
 	if(!queue) {
-		res.status(404).send('Invalid apiRequest')
+		return res.status(404).send('Invalid apiRequest')
 	}
 
 	let refreshToken = jwtTokenGen.createRefreshTokenClient(queue.tokenSalt);
@@ -158,6 +176,24 @@ router.post('/refreshTokenClient',jwtTokenCheck.clientRefresh, async (req, res) 
         tracks: savedQueue.tracks,
         token: jwtTokenGen.signClientData(queue.tokenSalt, {queueId: savedQueue.queueId})
     } );
+});
+
+router.get('/spotifyAccessToken', jwtTokenCheck.clientAccess, async(req, res) => {
+	let queueId = parseInt(req.headers['x-queue-id']);
+
+	if(!queueId) {
+		return res.status(404).send("No queue Id");
+	}
+
+	let queue = await Queue.findOne({ queueID : queueId});
+
+	if(!queue) {
+		return res.status(404).send("No queue found");
+	}
+
+	res.status(200).send({
+		accessToken: queue.accessToken
+	})
 });
 
 module.exports = router;
