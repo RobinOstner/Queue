@@ -1,12 +1,22 @@
 <template>
-  <div class="scroll">
-    <div class="spacer"/>
-    <transition-group name="tracks">
-      <preview v-for="(track, index) in tracks" :key="track.id" :id="track.id" :title="track.title" :artist="track.artist" :votes="track.votes" :duration="track.duration" :coverURL="track.coverURL" :spacer="showSpacer(index)" />
-    </transition-group>
-    <div class="spacer"/>
-    <div class="spacer"/>
-  </div>
+    <div class="scroll">
+      <div class="spacer" />
+      <transition-group name="tracks fade">
+        <preview
+          v-for="(track, index) in tracks"
+          :key="track.id"
+          :id="track.id"
+          :title="track.title"
+          :artist="track.artist"
+          :votes="track.votes"
+          :duration="track.duration"
+          :coverURL="track.coverURL"
+          :spacer="showSpacer(index)"
+        />
+      </transition-group>
+      <div class="spacer" />
+      <div class="spacer" />
+    </div>
 </template>
 
 <script>
@@ -33,7 +43,7 @@
         refreshTime: "queue/getRefreshTime",
         queueID: "queue/getQueueID",
         votedTracks: "queue/getVotedTracks"
-      }),
+      })
     },
     created() {
       this.refresh();
@@ -105,11 +115,21 @@
     transition: transform 1s;
   }
 
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.5s;
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
+  }
+
   .scroll {
     overflow: auto;
     height: 100%;
   }
-  
+
   .scroll::-webkit-scrollbar {
     width: 0px;
   }

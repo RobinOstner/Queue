@@ -3,15 +3,20 @@
     <div class="header">
       <h1 class="title left">Queue</h1>
       <h1 class="title right">{{ queueID }}</h1>
-      <div class="trackInfo" v-if="currentTrack.title && currentTrack.artist">
-        <h1 class="trackTitle">{{ currentTrack.title }}</h1>
-        <div class="separator"></div>
-        <h1 class="trackArtist">{{ currentTrack.artist }}</h1>
-      </div>
+      <transition name="fade" mode="out-in">
+        <div class="trackInfo" v-if="currentTrack.title && currentTrack.artist">
+          <h1 class="trackTitle">{{ currentTrack.title }}</h1>
+          <div class="separator"></div>
+          <h1 class="trackArtist">{{ currentTrack.artist }}</h1>
+        </div>
+      </transition>
     </div>
     <div class="content">
-      <mobile-queue v-if="searchEmpty"/>
-      <mobile-search v-else :search-input="searchInput"/>
+      <transition name="fade" mode="out-in">
+        <mobile-queue v-if="searchEmpty" />
+        <mobile-search v-else :search-input="searchInput" />
+      </transition>
+
       <div class="searchBar">
         <div class="searchButton" @click.stop="openSearchBar" v-if="!searchActive">
           <div class="searchPlaceholder">
@@ -23,7 +28,7 @@
           <div class="searchInputContainer">
             <div class="searchInput">
               <img src="/Icons/SearchIcon.png" alt="Search Icon" class="icon" />
-              <input class="inputField" ref="searchInput" v-model="searchInput" type="text"/>
+              <input class="inputField" ref="searchInput" v-model="searchInput" type="text" />
             </div>
           </div>
 
@@ -38,7 +43,7 @@
 
 <script>
   import MobileQueue from "@/components/Queue/Mobile";
-  import MobileSearch from "@/components/Search/Guest/Mobile/Mobile"
+  import MobileSearch from "@/components/Search/Guest/Mobile/Mobile";
 
   export default {
     name: "Guest",
@@ -67,7 +72,7 @@
 
         this.$nextTick(() => {
           this.$refs.searchInput.select();
-        })
+        });
       },
       closeSearchBar: function() {
         this.searchActive = false;
@@ -285,5 +290,15 @@
         }
       }
     }
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: all 0.5s;
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
   }
 </style>

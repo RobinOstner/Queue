@@ -66,6 +66,7 @@
     margin-right: 25px;
     margin-top: 10px;
     height: 5.5em;
+    transition: all 0.5s;
 
     img {
       height: 60%;

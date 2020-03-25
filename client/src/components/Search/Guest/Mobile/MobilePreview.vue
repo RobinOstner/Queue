@@ -1,20 +1,20 @@
 <template>
-  <div>
-    <div class="preview">
-      <img class="cover" :src="coverURL" />
-      <div class="info">
-        <h2 class="title">{{ title }}</h2>
-        <h2 class="artist">{{ artist }}</h2>
-        <div class="stats">
-          <h2 class="duration">{{ durationReadable }}</h2>
+    <div>
+      <div class="preview">
+        <img class="cover" :src="coverURL" />
+        <div class="info">
+          <h2 class="title">{{ title }}</h2>
+          <h2 class="artist">{{ artist }}</h2>
+          <div class="stats">
+            <h2 class="duration">{{ durationReadable }}</h2>
+          </div>
+        </div>
+        <div class="button" @click="add" v-bind:class="{ buttonSelected: this.voted }">
+          <h3>{{ buttonText }}</h3>
         </div>
       </div>
-      <div class="button" @click="add" v-bind:class="{ buttonSelected: this.voted }">
-        <h3>{{ buttonText }}</h3>
-      </div>
+      <div class="seperator" v-if="this.spacer" />
     </div>
-    <div class="seperator" v-if="this.spacer" />
-  </div>
 </template>
 
 <script>
@@ -181,4 +181,5 @@
     margin-top: 10px;
     background-image: linear-gradient(to right, #ffffff00, #ffffffff, #ffffff00);
   }
+
 </style>

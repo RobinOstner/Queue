@@ -1,9 +1,21 @@
 <template>
   <div class="scroll">
-    <div class="spacer"/>
-    <mobile-preview v-for="(result, index) in results" :key="result.id" :id="result.id" :title="result.title" :artist="result.artist" :duration="result.duration" :coverURL="result.coverURL" :spacer="showSpacer(index)"></mobile-preview>
-    <div class="spacer"/>
-    <div class="spacer"/>
+    <div class="spacer" />
+    <transition-group name="fade" appear mode="out-in">
+      <mobile-preview
+        class="mobile-preview"
+        v-for="(result, index) in results"
+        :key="result.id"
+        :id="result.id"
+        :title="result.title"
+        :artist="result.artist"
+        :duration="result.duration"
+        :coverURL="result.coverURL"
+        :spacer="showSpacer(index)"
+      ></mobile-preview>
+    </transition-group>
+    <div class="spacer" />
+    <div class="spacer" />
   </div>
 </template>
 
@@ -14,7 +26,7 @@
 
   export default {
     name: "mobile-search",
-    props: ['searchInput'],
+    props: ["searchInput"],
     data: function() {
       return {
         searching: false,
@@ -69,5 +81,19 @@
 
   .scroll::-webkit-scrollbar {
     width: 0px;
+  }
+
+  .mobile-preview {
+    transition: all 0.5s;
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.5s;
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
   }
 </style>
