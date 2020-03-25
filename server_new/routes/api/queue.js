@@ -9,7 +9,6 @@ const crypto = require('crypto')
 
 router.post("/createQueue", async (req, res) => {
   var accessToken = req.body.accessToken;
-
   var foundUniqueKey = false;
   while (!foundUniqueKey) {
     var queueID = util.generateNewQueueID();
@@ -21,7 +20,7 @@ router.post("/createQueue", async (req, res) => {
   const queue = new Queue({
     queueID: queueID,
     tokenSalt: queueTokenSalt,
-    accessToken,
+    accessToken: accessToken,
     password: queueTokenSalt
   });
 
@@ -129,11 +128,13 @@ router.post("/joinQueue", async (req, res) => {
 router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
   console.log("Delete queue", req.query.id);
   var id = parseInt(req.query.id);
-  Queue.deleteOne({ queueID: id }, function (err) {
-    if (err) {
-      console.log(err);
-      return;
+  Queue.deleteOne({ queueID: id }, function(err) {
+    if(err) {
+      console.log(err)
+      res.status(204).send(err);
     }
+  }).then( (result) => {
+    res.status(200).send();
   });
 });
 

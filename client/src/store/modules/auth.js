@@ -49,7 +49,6 @@ const actions = {
   refreshToken: async function ({ commit, state, dispatch }) {
     try {
       if (state.refreshToken) {
-        //TODO WHY DOUBLE ? 
         const response = await api.refreshToken(state.refreshToken);
         commit("SET_ACCESS_TOKEN", response.data.accessToken);
 
