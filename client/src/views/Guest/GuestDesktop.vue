@@ -27,7 +27,6 @@
   import HostQueue from "@/components/Queue"
 
   import api from "@/api";
-  import { mapGetters } from "vuex";
 
   export default {
     name: "Guest",
@@ -35,44 +34,15 @@
       DesktopSearch,
       HostQueue
     },
-    data: function() {
-      return {
-        timer: null,
-        currentTrack: {
-          id: "",
-          title: "",
-          artist: ""
-        }
-      };
-    },
-    created: function() {
-      this.timer = setInterval(this.timerCallback, this.$store.getters["queue/getRefreshTime"]);
-
-      window.addEventListener("beforeunload", this.clearTimer);
+    props: {
+      queueID: Number,
+      currentTrack: Object
     },
     computed: {
       title: function() {
-        return "Queue - " + this.queueID();
+        return "Queue - " + this.queueID;
       }
     },
-    methods: {
-      ...mapGetters("queue", {
-        queueID: "getQueueID"
-      }),
-      timerCallback: async function() {
-        var res = await api.queue.getCurrentTrack();
-
-        if (res) {
-          this.currentTrack = res.data.track;
-        }
-      },
-      clearTimer: () => {
-        clearInterval(this.timer);
-      }
-    },
-    beforeDestroy: function() {
-      clearInterval(this.timer);
-    }
   };
 </script>
 

@@ -3,6 +3,7 @@ import api from "@/api";
 const state = {
   id: "",
   refreshTime: 2500,
+  tracks: [],
   votedTracks: [],
   nextTrackWillPlay: false,
 }
@@ -10,6 +11,7 @@ const state = {
 const getters = {
   getQueueID: state => state.id,
   getRefreshTime: state => state.refreshTime,
+  getTracks: state => state.tracks,
   getVotedTracks: state => state.votedTracks,
   getNextTrackWillPlay: state => state.nextTrackIsAboutToPlay,
 }
@@ -17,6 +19,10 @@ const getters = {
 const mutations = {
   SET_QUEUE_ID(state, id) {
     state.id = id;
+  },
+
+  SET_TRACKS(state, tracks) {
+    state.tracks = tracks;
   },
 
   ADD_VOTED_TRACK(state, trackID) {
