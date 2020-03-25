@@ -41,7 +41,7 @@
     "rules": {
       "no-console": "warn",
       "no-unused-vars": "warn",
-      "no-useless-escape":"off"
+      "no-useless-escape": "off"
     },
     "parserOptions": {
       "parser": "babel-eslint"
