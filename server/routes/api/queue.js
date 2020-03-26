@@ -82,8 +82,7 @@ router.post("/setQueuePassword", jwtTokenCheck.hostAccess, async (req, res) => {
       console.log(err);
       return res.status(500).send();
     }
-    
-    console.log(queue);
+
     return res.status(200).send();
   });
 });
@@ -126,7 +125,7 @@ router.post("/joinQueue", async (req, res) => {
 
 //ToDo check if actual object id is used or queueID
 router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
-  console.log("Delete queue", req.query.id);
+  //console.log("Delete queue", req.query.id);
   var id = parseInt(req.query.id);
   Queue.deleteOne({ queueID: id }, function(err) {
     if(err) {
@@ -397,8 +396,6 @@ router.get("/nextTrack", jwtTokenCheck.hostAccess, async (req, res) => {
 router.get("/currentTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
   let queueID = parseInt(req.headers["x-queue-id"]);
 
-  console.log(req.decoded);
-
   var queue = await Queue.findOne({ queueID: queueID });
 
   if (!queue) {
@@ -408,6 +405,41 @@ router.get("/currentTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) 
   var currentTrack = queue.currentTrack;
 
   res.send({ track: currentTrack });
+});
+
+router.delete("/removeTrack", jwtTokenCheck.hostAccess, async(req, res) => {
+  let queueID = parseInt(req.body.queueID);
+  let trackID = req.body.trackID;
+
+  if(!queueID) {
+    return res.status(404).send({error: "No Queue Id provided"});
+  }
+
+  if(!trackID)  {
+    return res.status(404).send({error: "No Track Id provided"});
+
+  }
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if (!queue) {
+    res.status(404).send({ error: "No queue found" });
+  }
+
+  await Queue.findOneAndUpdate(
+      {
+        queueID: queueID,
+      },
+      {
+        $pull: {
+          tracks : {
+            id: trackID
+          }
+        }
+      }
+  );
+
+  return res.status(200).send();
 });
 
 module.exports = router;
