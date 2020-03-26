@@ -1,90 +1,170 @@
-const util = require("../../util/");
-const config = require("../../config");
-const jwt = require("../../util/token/tokenHandler");
-const tokenChecker = require('../../util/token/tokenChecker');
+const router = require("express").Router();
 
-var env = process.env.NODE_ENV || 'development';
-const credential = require('./../../config/credentials')[env];
-
-const querystring = require("querystring");
-const express = require("express");
-const { DBConnection } = require("../../extern/mongo/dbConnection.js");
-const queueDB = require("../../extern/mongo/queueDB");
-
-const router = express.Router();
+const Queue = require("../../model/Queue");
+const Track = require("../../model/Track");
+const util = require("../../util/index");
+const jwtTokenGen = require("../../util/token/tokenHandler");
+const jwtTokenCheck = require("../../util/token/tokenChecker");
+const crypto = require('crypto')
 
 router.post("/createQueue", async (req, res) => {
   var accessToken = req.body.accessToken;
-
   var foundUniqueKey = false;
   while (!foundUniqueKey) {
     var queueID = util.generateNewQueueID();
-    foundUniqueKey = true; //! await queueDB.queueExists(queueID);
+    foundUniqueKey = !(await Queue.findOne({ queueID: queueID }));
   }
 
   let queueTokenSalt = util.generateRandomString(16);
 
-  var queue = {
-    queueID,
-    queueTokenSalt,
-    accessToken,
-    currentTrack: null,
-    tracks: []
-  };
+  const queue = new Queue({
+    queueID: queueID,
+    tokenSalt: queueTokenSalt,
+    accessToken: accessToken,
+    password: queueTokenSalt
+  });
 
-  queueDB.createQueue(queue);
-  let accessTokens = jwt.createInitialTokenSet(queueTokenSalt);
+  try {
+    const savedQueue = await queue.save();
 
-  res.cookie("refreshToken", accessTokens.refreshToken, {httpOnly: true, Secure: true});
+    let refreshToken = jwtTokenGen.createRefreshTokenHost(savedQueue.tokenSalt);
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, Secure: true });
 
-  res.status(201).json({
-    id: queueID,
-    token: accessTokens.token,
-  }).send();
+    res.status(201).send({
+      queueID: savedQueue.queueID,
+      tracks: savedQueue.tracks,
+      token: jwtTokenGen.signHostData(savedQueue.tokenSalt, { queueID: savedQueue.queueID })
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
 });
 
-router.post("/joinQueue", async (req, res) => {
-  const queueId = parseInt(req.body.queueID);
-  queueDB.queueExists(queueId).then(queue => {
-    if (!queue) {
-      res.status(404).send({error: "No queue found"});
-    }
+router.get("/queueHasPassword", async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
 
-    let accessTokens = jwt.createInitialTokenSet(queue.queueTokenSalt);
+  if(!queueID) {
+    return res.send(400);
+  }
 
-    res.cookie("refreshToken", accessTokens.refreshToken, {httpOnly: true, Secure: true});
-    res.json({
-      token: accessTokens.token,
-      accessToken: queue.accessToken,
-    }).send()
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if(!queue) {
+    return res.sendStatus(404);
+  }
+
+  return res.status(200).send( {
+    hasPassword : queue.hasPassword()
   });
 });
 
-router.delete("/closeQueue", tokenChecker, async (req, res) => {
-  res.send();
-  var id = parseInt(req.query.id);
-
-  queueDB.closeQueue(id);
-});
-
-router.get("/queueAll", tokenChecker, async (req, res) => {
-  res.send(loadQueuesCollection().toArray());
-});
-
-router.post("/addTrack", tokenChecker, async (req, res) => {
+router.post("/setQueuePassword", jwtTokenCheck.hostAccess, async (req, res) => {
   var queueID = parseInt(req.body.queueID);
+  var password = req.body.password;
 
-  var queue = await queueDB.queueExists(queueID);
+  if(!queueID || !password) {
+    return res.send(400);
+  }
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if(!queue) {
+    return res.send(404);
+  }
+
+  let hash = crypto.createHash('md5').update( queue.tokenSalt + queue.tokenSalt + password + queue.tokenSalt).digest("hex");
+  queue.password = hash;
+  
+
+  await queue.save(function(err, queue) {
+    if(err){
+      console.log(err);
+      return res.status(500).send();
+    }
+
+    return res.status(200).send();
+  });
+});
+
+router.post("/joinQueue", async (req, res) => {
+  const queueID = parseInt(req.body.queueID);
+
+  const password = req.body.password;
+
+  Queue.findOne({ queueID: queueID })
+    .then(queue => {
+      if (!queue) {
+        return res.status(404).send({ error: "No queue found" });
+      }
+
+      if(queue.hasPassword() && !password){
+        return res.status(401).send({ error: "Unauthorized"});
+      }
+
+      if(queue.hasPassword() && !queue.checkPassword(password)){
+        return res.status(401).send({ error: "Unauthorized"});
+      }
+
+      let jwtAccessToken = jwtTokenGen.signClientData(queue.tokenSalt, { queueID: queue.queueID });
+
+      res.cookie("refreshToken", jwtTokenGen.createRefreshTokenClient(queue.tokenSalt), { httpOnly: true, Secure: true });
+      res
+        .json({
+          token: jwtAccessToken,
+          accessToken: queue.accessToken
+        })
+        .send();
+    })
+    .catch(err => {
+      console.log(err);
+
+      res.status(404).send();
+    });
+});
+
+//ToDo check if actual object id is used or queueID
+router.delete("/closeQueue", jwtTokenCheck.hostAccess, async (req, res) => {
+  //console.log("Delete queue", req.query.id);
+  var id = parseInt(req.query.id);
+  Queue.deleteOne({ queueID: id }, function(err) {
+    if(err) {
+      console.log(err)
+      res.status(204).send(err);
+    }
+  }).then( (result) => {
+    res.status(200).send();
+  });
+});
+
+//ToDo check if needed
+router.get("/queueAll", async (req, res) => {
+  await Queue.find(
+    {},
+    (err, queues) => {
+      res.send(queues);
+    },
+    {}
+  );
+});
+
+router.post("/addTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
+  var queueID = parseInt(req.body.queueID);
+  var queue = await Queue.findOne({ queueID: queueID });
 
   if (!queue) {
-    res.status(404).send({
+    return res.status(404).send({
       message: "Invalid Queue ID!"
     });
   }
 
-  var track = req.body.track;
-  console.log(track)
-  track.votes = 1;
+  var track = Track({
+    id: req.body.track.id,
+    title: req.body.track.title,
+    artist: req.body.track.artist,
+    duration: req.body.track.duration,
+    coverURL: req.body.track.coverURL,
+  });
 
   var trackExists = false;
 
@@ -96,21 +176,31 @@ router.post("/addTrack", tokenChecker, async (req, res) => {
   });
 
   if (trackExists) {
-    await queueDB.voteTrack(queueID, req.body.track.id);
-    res.send();
-    return;
+    await Queue.findOneAndUpdate(
+      {
+        queueID: queueID,
+        "tracks.id": track.id
+      },
+      {
+        $inc: {
+          "tracks.$.votes": 1
+        }
+      }
+    );
+
+    return res.send("Voted up");
   }
 
   // TODO: Verify Track has needed Information
-  await queueDB.addTrack(queueID, track);
-
-  res.send();
+  queue.tracks.push(track);
+  let newQueue = await queue.save();
+  res.send(newQueue);
 });
 
-router.get("/getTracks", tokenChecker, async (req, res) => {
+router.get("/getTracks", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
   var queueID = parseInt(req.query.queueID);
 
-  var queue = await queueDB.queueExists(queueID);
+  var queue = await Queue.findOne({ queueID: queueID });
 
   if (!queue) {
     res.status(404).send({
@@ -120,7 +210,7 @@ router.get("/getTracks", tokenChecker, async (req, res) => {
 
   var tracks = queue.tracks;
 
-  tracks.sort(function (a, b) {
+  tracks.sort(function(a, b) {
     if (a.votes < b.votes) return 1;
     if (a.votes > b.votes) return -1;
     return 0;
@@ -151,10 +241,120 @@ router.get("/getTracks", tokenChecker, async (req, res) => {
   });
 });
 
-router.get("/nextTrack", tokenChecker, async (req, res) => {
+router.post("/voteTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+  var trackID = req.query.trackID;
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if (!queue) {
+    return res.status(404).send({
+      message: "Invalid Queue ID!"
+    });
+  }
+
+  var trackExists = false;
+
+  queue.tracks.some(item => {
+    if (item.id === trackID) {
+      trackExists = true;
+      return true;
+    }
+  });
+
+  if (!trackExists) {
+    return res.status(404).send();
+  }
+
+  await Queue.findOneAndUpdate(
+    {
+      queueID: queueID,
+      "tracks.id": trackID
+    },
+    {
+      $inc: {
+        "tracks.$.votes": 1
+      }
+    }
+  );
+
+  return res.send();
+});
+
+router.post("/unvoteTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
+  var queueID = parseInt(req.query.queueID);
+  var trackID = req.query.trackID;
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if (!queue) {
+    return res.status(404).send({
+      message: "Invalid Queue ID!"
+    });
+  }
+
+  var track;
+
+  queue.tracks.some(item => {
+    if (item.id === trackID) {
+      track = item;
+      return item;
+    }
+  });
+
+  if (!track) {
+    return res.status(404).send();
+  }
+  if (track.votes === 1) {
+    queue.tracks = queue.tracks.filter(item => {
+      return item.id !== track.id;
+    });
+
+    await queue.save();
+    return res.send("Item removed");
+  }
+
+  await Queue.findOneAndUpdate(
+    {
+      queueID: queueID,
+      "tracks.id": trackID
+    },
+    {
+      $inc: {
+        "tracks.$.votes": -1
+      }
+    }
+  );
+
+  return res.send("Item decremented");
+});
+
+//ToDo check if track is in tracks list if so remove
+router.post("/currentTrack", jwtTokenCheck.hostAccess, async (req, res) => {
+  let reqTrack = req.body.track;
+  let queueID = parseInt(req.headers["x-queue-id"]);
+
+  var track = new Track({
+    id: reqTrack.id,
+    title: reqTrack.title,
+    artist: reqTrack.artist,
+    duration: reqTrack.duration,
+    coverURL: reqTrack.coverURL
+  });
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  queue.currentTrack = track;
+
+  await queue.save();
+
+  res.send();
+});
+
+router.get("/nextTrack", jwtTokenCheck.hostAccess, async (req, res) => {
   var queueID = parseInt(req.query.queueID);
 
-  var queue = await queueDB.queueExists(queueID);
+  var queue = await Queue.findOne({ queueID: queueID });
 
   if (!queue) {
     res.status(404).send({
@@ -169,7 +369,7 @@ router.get("/nextTrack", tokenChecker, async (req, res) => {
     return;
   }
 
-  tracks.sort(function (a, b) {
+  tracks.sort(function(a, b) {
     if (a.votes < b.votes) return 1;
     if (a.votes > b.votes) return -1;
     return 0;
@@ -177,61 +377,69 @@ router.get("/nextTrack", tokenChecker, async (req, res) => {
 
   var nextTrack = tracks[0];
 
+  queue.tracks.splice(
+    queue.tracks.findIndex(item => item.id === nextTrack.id),
+    1
+  );
+
+  await queue.save();
+
   delete nextTrack.votes;
 
   res.send({
-    track: nextTrack,
+    track: nextTrack
   });
 
-  await queueDB.removeTrack(queueID, nextTrack.id);
-})
-
-router.put("/voteTrack", tokenChecker, async (req, res) => {
-  var queueID = parseInt(req.query.queueID);
-  var trackID = req.query.trackID;
-
-  await queueDB.voteTrack(queueID, trackID);
-
-  res.send();
+  //await queueDB.removeTrack(queueID, nextTrack.id);
 });
 
-router.put("/unvoteTrack", async (req, res) => {
-  var queueID = parseInt(req.query.queueID);
-  var trackID = req.query.trackID;
+router.get("/currentTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) => {
+  let queueID = parseInt(req.headers["x-queue-id"]);
 
-  await queueDB.unvoteTrack(queueID, trackID);
-
-  
-  await queueDB.removeTrackIfNoVotes(queueID, trackID);
-  res.send();
-})
-
-router.post("/currentTrack", tokenChecker, async (req, res) => {
-  let track = req.body.track;
-  let queueID = parseInt(req.headers['x-queue-id']);
-
-  await queueDB.setCurrentTrack(queueID, track);
-
-  res.send();
-});
-
-router.get("/currentTrack", tokenChecker, async (req, res) => {
-  let queueID = parseInt(req.headers['x-queue-id']);
-
-  var queue = await queueDB.queueExists(queueID);
+  var queue = await Queue.findOne({ queueID: queueID });
 
   if (!queue) {
-    res.status(404).send({error: "No queue found"});
+    res.status(404).send({ error: "No queue found" });
   }
 
   var currentTrack = queue.currentTrack;
 
   res.send({ track: currentTrack });
-})
+});
 
-async function loadQueuesCollection() {
-  const client = await DBConnection.connect();
-  return client.db("queue").collection("queues");
-}
+router.delete("/removeTrack", jwtTokenCheck.hostAccess, async(req, res) => {
+  let queueID = parseInt(req.body.queueID);
+  let trackID = req.body.trackID;
+
+  if(!queueID) {
+    return res.status(404).send({error: "No Queue Id provided"});
+  }
+
+  if(!trackID)  {
+    return res.status(404).send({error: "No Track Id provided"});
+
+  }
+
+  var queue = await Queue.findOne({ queueID: queueID });
+
+  if (!queue) {
+    res.status(404).send({ error: "No queue found" });
+  }
+
+  await Queue.findOneAndUpdate(
+      {
+        queueID: queueID,
+      },
+      {
+        $pull: {
+          tracks : {
+            id: trackID
+          }
+        }
+      }
+  );
+
+  return res.status(200).send();
+});
 
 module.exports = router;

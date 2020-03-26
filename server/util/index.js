@@ -10,6 +10,11 @@ module.exports = {
   },
 
   generateNewQueueID: function () {
-    return Math.floor(Math.random() * 1000000);
+    var ran = 0;
+
+    while(ran > 999999 || ran < 100000 ) {
+      ran = Math.floor(Math.random() * 1000000);
+    }
+    return ran;
   }
 }
