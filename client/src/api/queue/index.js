@@ -102,6 +102,17 @@ export default {
     });
   },
 
+  removeTrack: async function (store, trackID) {
+    return request({
+      url: endpoint + "/removeTrack",
+      method: "delete",
+      params: {
+        queueID: store.getters["queue/getQueueID"],
+        trackID
+      }
+    });
+  },
+
   joinQueue: async function(queueID, password) {
     return request({
       url: endpoint + "/joinQueue",
