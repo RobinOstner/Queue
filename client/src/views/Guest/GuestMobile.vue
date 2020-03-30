@@ -4,7 +4,7 @@
       <h1 class="title left">Queue</h1>
       <h1 class="title right">{{ queueID }}</h1>
       <transition name="fade" mode="out-in">
-        <div class="trackInfo" v-if="currentTrack.title && currentTrack.artist">
+        <div class="trackInfo" v-if="currentTrack && currentTrack.title && currentTrack.artist">
           <h1 class="trackTitle">{{ currentTrack.title }}</h1>
           <div class="separator"></div>
           <h1 class="trackArtist">{{ currentTrack.artist }}</h1>

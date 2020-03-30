@@ -408,8 +408,8 @@ router.get("/currentTrack", jwtTokenCheck.hostAndClientAccess, async (req, res) 
 });
 
 router.delete("/removeTrack", jwtTokenCheck.hostAccess, async(req, res) => {
-  let queueID = parseInt(req.body.queueID);
-  let trackID = req.body.trackID;
+  let queueID = parseInt(req.query.queueID);
+  let trackID = req.query.trackID;
 
   if(!queueID) {
     return res.status(404).send({error: "No Queue Id provided"});

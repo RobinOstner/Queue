@@ -11,7 +11,7 @@
           <h2 class="votes">{{ votes }} Votes</h2>
         </div>
       </div>
-      <div class="button">
+      <div class="button" @click="removeClicked">
         <h3>REMOVE</h3>
       </div>
     </div>
@@ -50,6 +50,10 @@
           await api.queue.voteTrack(this.$store, this.id);
           this.$store.commit("queue/ADD_VOTED_TRACK", this.id);
         }
+      },
+      removeClicked: async function() {
+        console.log("Remove");
+        api.queue.removeTrack(this.$store, this.id);
       }
     }
   });
