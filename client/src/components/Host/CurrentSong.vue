@@ -123,15 +123,15 @@
   }
 
   .title {
-    font-size: 9em;
+    font-size: 6em;
     font-weight: normal;
-    margin: 0;
+    margin: 0.2em 1em;
   }
 
   .artist {
-    font-size: 4.5em;
+    font-size: 3.5em;
     font-weight: normal;
-    margin: 0;
+    margin: 0.2em 1em;
   }
 
   .divider {

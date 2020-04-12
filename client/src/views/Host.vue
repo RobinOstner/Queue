@@ -109,7 +109,7 @@
             margin: 0;
             color: white;
             font-family: "Rationale", sans-serif;
-            font-size: 4.5em;
+            font-size: 3.5em;
             font-weight: normal;
             text-transform: uppercase;
         }

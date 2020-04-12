@@ -123,13 +123,16 @@
       width: 100%;
       text-align: center;
       margin: 0;
-      margin-top: 15px;
+      margin-top: 25px;
       align-content: center;
       z-index: 2;
 
       .trackTitle {
-        margin: 0;
+        margin: 0 5%;
         font-size: 1.5em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .separator {
@@ -154,11 +157,13 @@
   }
 
   .content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: fixed;
     bottom: 0;
+    min-height: 100%;
+    max-height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overflow-y: scroll;
     padding: 0 0 0 0;
     flex-grow: 1;
 
@@ -171,7 +176,7 @@
     }
 
     .searchBar {
-      position: absolute;
+      position: fixed;
       bottom: 0;
       background-image: linear-gradient(0deg, #060c14 25%, #060c1400);
       height: 35%;
@@ -179,8 +184,8 @@
       pointer-events: none;
 
       .searchButton {
-        position: absolute;
-        bottom: 10%;
+        position: fixed;
+        bottom: 3%;
         left: 0;
         right: 0;
         margin: auto;

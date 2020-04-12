@@ -71,12 +71,13 @@
 
 <style lang="scss" scoped>
   .spacer {
-    height: 5.5em;
+    height: 6.5em;
   }
 
   .scroll {
     overflow: auto;
     height: 100%;
+    width: 100%;
   }
 
   .scroll::-webkit-scrollbar {

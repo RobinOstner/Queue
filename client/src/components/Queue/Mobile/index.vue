@@ -108,7 +108,7 @@
 
 <style lang="scss" scoped>
   .spacer {
-    height: 5.5em;
+    height: 6.5em;
   }
 
   .tracks-move {
