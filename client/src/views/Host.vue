@@ -60,7 +60,7 @@
             },
             refreshSpotifyToken: function () {
                 api.auth.refreshToken(this.$cookies.get('spotifyRefresh'), this.queueID()).then( res => {
-                    this.setAccessToken(res.access_token);
+                    this.setAccessToken(res.data.access_token);
                 });
             },
         },
